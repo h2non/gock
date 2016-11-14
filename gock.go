@@ -116,6 +116,11 @@ func GetUnmatchedRequests() []*http.Request {
 	return unmatchedRequests
 }
 
+// HasUnmatchedRequest returns true if gock has received any requests that didn't match a mock
+func HasUnmatchedRequest() bool {
+	return len(GetUnmatchedRequests()) > 0
+}
+
 func trackUnmatchedRequest(req *http.Request) {
 	mutex.Lock()
 	defer mutex.Unlock()
