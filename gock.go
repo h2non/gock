@@ -17,7 +17,7 @@ var config = struct {
 }{}
 
 // track unmatched requests so they can be tested for
-var unmatchedRequests []*http.Request = []*http.Request{}
+var unmatchedRequests = []*http.Request{}
 
 // New creates and registers a new HTTP mock with
 // default settings and returns the Request DSL for HTTP mock
