@@ -16,6 +16,9 @@ var config = struct {
 	NetworkingFilters []FilterRequestFunc
 }{}
 
+// track unmatched requests so they can be tested for
+var unmatchedRequests []*http.Request = []*http.Request{}
+
 // New creates and registers a new HTTP mock with
 // default settings and returns the Request DSL for HTTP mock
 // definition and set up.
@@ -104,6 +107,19 @@ func DisableNetworkingFilters() {
 	mutex.Lock()
 	defer mutex.Unlock()
 	config.NetworkingFilters = []FilterRequestFunc{}
+}
+
+// GetUnmatchedRequests returns all requests that have been received but haven't matched any mock
+func GetUnmatchedRequests() []*http.Request {
+	mutex.Lock()
+	defer mutex.Unlock()
+	return unmatchedRequests
+}
+
+func trackUnmatchedRequest(req *http.Request) {
+	mutex.Lock()
+	defer mutex.Unlock()
+	unmatchedRequests = append(unmatchedRequests, req)
 }
 
 func normalizeURI(uri string) string {

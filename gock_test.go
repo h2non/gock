@@ -300,6 +300,23 @@ func TestMockPersistTimes(t *testing.T) {
 	}
 }
 
+func TestUnmatched(t *testing.T) {
+	defer after()
+
+	// clear out any unmatchedRequests from other tests
+	unmatchedRequests = []*http.Request{}
+
+	Intercept()
+
+	_, err := http.Get("http://server.com/unmatched")
+	st.Reject(t, err, nil)
+
+	unmatched := GetUnmatchedRequests()
+	st.Expect(t, len(unmatched), 1)
+	st.Expect(t, unmatched[0].URL.Host, "server.com")
+	st.Expect(t, unmatched[0].URL.Path, "/unmatched")
+}
+
 func TestMultipleMocks(t *testing.T) {
 	defer Disable()
 

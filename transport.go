@@ -65,6 +65,7 @@ func (m *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	// Verify if should use real networking
 	networking := shouldUseNetwork(req, mock)
 	if !networking && mock == nil {
+		trackUnmatchedRequest(req)
 		return nil, ErrCannotMatch
 	}
 
