@@ -6,7 +6,7 @@ Heavily inspired by [nock](https://github.com/node-nock/nock). See also its Pyth
 
 Take a look to the [examples](#examples) to get started.
 
-## Features  
+## Features
 
 - Simple, expressive, fluent API.
 - Semantic DSL for easy HTTP mocks definition.
@@ -86,7 +86,7 @@ package test
 
 import (
   "github.com/nbio/st"
-  "gopkg.in/h2non/gock.v0"
+  "gopkg.in/h2non/gock.v1"
   "io/ioutil"
   "net/http"
   "testing"
@@ -119,7 +119,7 @@ package test
 
 import (
   "github.com/nbio/st"
-  "gopkg.in/h2non/gock.v0"
+  "gopkg.in/h2non/gock.v1"
   "io/ioutil"
   "net/http"
   "testing"
@@ -159,7 +159,7 @@ package test
 import (
   "bytes"
   "github.com/nbio/st"
-  "gopkg.in/h2non/gock.v0"
+  "gopkg.in/h2non/gock.v1"
   "io/ioutil"
   "net/http"
   "testing"
@@ -170,7 +170,7 @@ func TestMockSimple(t *testing.T) {
 
   gock.New("http://foo.com").
     Post("/bar").
-    Type("json").
+    MatchType("json").
     JSON(map[string]string{"foo": "bar"}).
     Reply(201).
     JSON(map[string]string{"bar": "foo"})
@@ -195,7 +195,7 @@ package test
 
 import (
   "github.com/nbio/st"
-  "gopkg.in/h2non/gock.v0"
+  "gopkg.in/h2non/gock.v1"
   "io/ioutil"
   "net/http"
   "testing"
@@ -230,7 +230,7 @@ package main
 
 import (
   "fmt"
-  "gopkg.in/h2non/gock.v0"
+  "gopkg.in/h2non/gock.v1"
   "io/ioutil"
   "net/http"
 )
