@@ -2,9 +2,11 @@ package gock
 
 import (
 	"compress/gzip"
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 	"regexp"
 )
 
@@ -161,7 +163,25 @@ func MatchBody(req *http.Request, ereq *Request) (bool, error) {
 
 	// Match request body by regexp
 	match, _ := regexp.MatchString(matchStr, bodyStr)
-	return match, nil
+	if match == true {
+		return true, nil
+	}
+
+	// todo - add conditional do only perform the conversion of body bytes
+	// representation of JSON to a map and then compare them for equality.
+
+	// Check if the key + value pairs match
+	var bodyMap map[string]interface{}
+	var matchMap map[string]interface{}
+
+	// Ensure that both byte bodies that that should be JSON can be converted to maps.
+	umErr := json.Unmarshal(body, &bodyMap)
+	umErr2 := json.Unmarshal(ereq.BodyBuffer, &matchMap)
+	if umErr == nil && umErr2 == nil && reflect.DeepEqual(bodyMap, matchMap) {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func supportedType(req *http.Request) bool {

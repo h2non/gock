@@ -170,6 +170,9 @@ func TestMatchBody(t *testing.T) {
 		{`"foo"`, `{"foo":"bar"}\n`, true},
 		{`{"foo":"bar"}`, `{"foo":"bar"}\n`, true},
 		{`{"foo":"foo"}`, `{"foo":"bar"}\n`, false},
+
+		{`{"foo":"bar","bar":"foo"}`, `{"bar":"foo","foo":"bar"}`, true},
+		{`{"bar":"foo","foo":{"two":"three","three":"two"}}`, `{"foo":{"three":"two","two":"three"},"bar":"foo"}`, true},
 	}
 
 	for _, test := range cases {
