@@ -28,6 +28,9 @@ func GetAll() []Mock {
 
 // Exists checks if the given Mock is already registered.
 func Exists(m Mock) bool {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	for _, mock := range mocks {
 		if mock == m {
 			return true
