@@ -23,6 +23,8 @@ func Register(mock Mock) {
 
 // GetAll returns the current stack of registed mocks.
 func GetAll() []Mock {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return mocks
 }
 
