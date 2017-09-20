@@ -38,25 +38,25 @@ func TestRequestPath(t *testing.T) {
 func TestRequestBody(t *testing.T) {
 	req := NewRequest()
 	req.Body(bytes.NewBuffer([]byte("foo bar")))
-	st.Expect(t, string(req.BodyBuffer), "foo bar")
+	st.Expect(t, string(req.BodyMatchers[0]), "foo bar")
 }
 
 func TestRequestBodyString(t *testing.T) {
 	req := NewRequest()
 	req.BodyString("foo bar")
-	st.Expect(t, string(req.BodyBuffer), "foo bar")
+	st.Expect(t, string(req.BodyMatchers[0]), "foo bar")
 }
 
 func TestRequestFile(t *testing.T) {
 	req := NewRequest()
 	req.File("version.go")
-	st.Expect(t, string(req.BodyBuffer)[:12], "package gock")
+	st.Expect(t, string(req.BodyMatchers[0])[:12], "package gock")
 }
 
 func TestRequestJSON(t *testing.T) {
 	req := NewRequest()
 	req.JSON(map[string]string{"foo": "bar"})
-	st.Expect(t, string(req.BodyBuffer)[:13], `{"foo":"bar"}`)
+	st.Expect(t, string(req.BodyMatchers[0])[:13], `{"foo":"bar"}`)
 	st.Expect(t, req.Header.Get("Content-Type"), "application/json")
 }
 
@@ -66,8 +66,23 @@ func TestRequestXML(t *testing.T) {
 		Data string `xml:"data"`
 	}
 	req.XML(xml{Data: "foo"})
-	st.Expect(t, string(req.BodyBuffer), `<xml><data>foo</data></xml>`)
+	st.Expect(t, string(req.BodyMatchers[0]), `<xml><data>foo</data></xml>`)
 	st.Expect(t, req.Header.Get("Content-Type"), "application/xml")
+}
+
+func TestRequestMultipleMatchers(t *testing.T) {
+	// Body()
+	req := NewRequest()
+	req.Body(bytes.NewBuffer([]byte("foo bar")))
+	// BodyString()
+	req.BodyString("foo bar")
+	// JSON()
+	req.JSON(map[string]string{"foo": "bar"})
+
+	st.Expect(t, string(req.BodyMatchers[0]), "foo bar")
+	st.Expect(t, string(req.BodyMatchers[1]), "foo bar")
+	st.Expect(t, string(req.BodyMatchers[2])[:13], `{"foo":"bar"}`)
+	st.Expect(t, req.Header.Get("Content-Type"), "application/json")
 }
 
 func TestRequestMatchType(t *testing.T) {
