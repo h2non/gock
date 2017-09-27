@@ -47,7 +47,7 @@ type Request struct {
 	// Cookies stores the Request HTTP cookies values to match.
 	Cookies []*http.Cookie
 
-	// BodyBuffer stores the body data to match.
+	// BodyMatchers stores the body data to match.
 	BodyMatchers [][]byte
 
 	// Mappers stores the request functions mappers used for matching.
@@ -133,9 +133,7 @@ func (r *Request) Body(body io.Reader) *Request {
 
 // BodyString defines the body to match based on a given string.
 func (r *Request) BodyString(body string) *Request {
-	var bodyBuffer []byte
-	bodyBuffer = []byte(body)
-	r.BodyMatchers = append(r.BodyMatchers, bodyBuffer)
+	r.BodyMatchers = append(r.BodyMatchers, []byte(body))
 	return r
 }
 
