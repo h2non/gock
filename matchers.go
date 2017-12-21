@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
-    "strings"
+	"strings"
 )
 
 // EOL represents the end of line character.
