@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"reflect"
 	"regexp"
+    "strings"
 )
 
 // EOL represents the end of line character.
@@ -52,7 +53,7 @@ func MatchScheme(req *http.Request, ereq *Request) (bool, error) {
 // MatchHost matches the HTTP host header field of the given request.
 func MatchHost(req *http.Request, ereq *Request) (bool, error) {
 	url := ereq.URLStruct
-	if url.Host == req.URL.Host {
+	if strings.EqualFold(url.Host, req.URL.Host) {
 		return true, nil
 	}
 	return regexp.MatchString(url.Host, req.URL.Host)

@@ -59,6 +59,7 @@ func TestMatchHost(t *testing.T) {
 		matches bool
 	}{
 		{"foo.com", "foo.com", true},
+		{"FOO.com", "foo.com", true},
 		{"foo.net", "foo.com", false},
 		{"foo", "foo.com", true},
 		{"(.*).com", "foo.com", true},
