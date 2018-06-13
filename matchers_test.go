@@ -93,6 +93,7 @@ func TestMatchPath(t *testing.T) {
 		{"/foo/[a-z]+", "/foo/bar", true},
 		{"/foo/baz", "/foo/bar", false},
 		{"/foo/baz", "/foo/bar", false},
+		{"/foo/bar%3F+%C3%A9", "/foo/bar%3F+%C3%A9", true},
 	}
 
 	for _, test := range cases {

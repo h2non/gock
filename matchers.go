@@ -61,6 +61,9 @@ func MatchHost(req *http.Request, ereq *Request) (bool, error) {
 
 // MatchPath matches the HTTP URL path of the given request.
 func MatchPath(req *http.Request, ereq *Request) (bool, error) {
+	if req.URL.Path == ereq.URLStruct.Path {
+		return true, nil
+	}
 	return regexp.MatchString(ereq.URLStruct.Path, req.URL.Path)
 }
 
