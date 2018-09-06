@@ -1,12 +1,13 @@
 language: go
 
 go:
+  - "1.11"
   - "1.10"
   - "1.92"
   - "1.82"
   - "1.72"
   - "1.62"
-  - "tip"
+  - "stable"
 
 before_install:
   - go get -u github.com/nbio/st

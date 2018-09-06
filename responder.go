@@ -71,8 +71,10 @@ func createResponse(req *http.Request) *http.Response {
 
 // mergeHeaders copies the mock headers.
 func mergeHeaders(res *http.Response, mres *Response) http.Header {
-	for key := range mres.Header {
-		res.Header.Set(key, mres.Header.Get(key))
+	for key, values := range mres.Header {
+		for _, value := range values {
+			res.Header.Add(key, value)
+		}
 	}
 	return res.Header
 }

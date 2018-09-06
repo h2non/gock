@@ -23,6 +23,19 @@ func TestResponder(t *testing.T) {
 	st.Expect(t, string(body), "foo")
 }
 
+func TestResponderSupportsMultipleHeadersWithSameKey(t *testing.T) {
+	defer after()
+	mres := New("http://foo").
+		Reply(200).
+		AddHeader("Set-Cookie", "a=1").
+		AddHeader("Set-Cookie", "b=2")
+	req := &http.Request{}
+
+	res, err := Responder(req, mres, nil)
+	st.Expect(t, err, nil)
+	st.Expect(t, res.Header, http.Header{"Set-Cookie": []string{"a=1", "b=2"}})
+}
+
 func TestResponderError(t *testing.T) {
 	defer after()
 	mres := New("http://foo.com").ReplyError(errors.New("error"))
