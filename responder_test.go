@@ -38,7 +38,7 @@ func TestResponder_ReadTwice(t *testing.T) {
 
 	body, err = ioutil.ReadAll(res.Body)
 	st.Expect(t, err, nil)
-	st.Expect(t, body,[]byte{})
+	st.Expect(t, body, []byte{})
 }
 
 func TestResponderSupportsMultipleHeadersWithSameKey(t *testing.T) {
