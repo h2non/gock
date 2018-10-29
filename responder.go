@@ -92,11 +92,7 @@ type dummyReadCloser struct {
 
 // Read implements the required method by io.ReadClose interface.
 func (d *dummyReadCloser) Read(p []byte) (n int, err error) {
-	n, err = d.body.Read(p)
-	if err == io.EOF {
-		d.body.Seek(0, 0)
-	}
-	return n, err
+	return d.body.Read(p)
 }
 
 // Close implements a no-op required method by io.ReadClose interface.
