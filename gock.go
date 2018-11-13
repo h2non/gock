@@ -52,6 +52,8 @@ func New(uri string) *Request {
 
 // Intercepting returns true if gock is currently able to intercept.
 func Intercepting() bool {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return http.DefaultTransport == DefaultTransport
 }
 
