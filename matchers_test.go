@@ -179,7 +179,7 @@ func TestMatchBody(t *testing.T) {
 
 	for _, test := range cases {
 		req := &http.Request{Body: createReadCloser([]byte(test.body))}
-		ereq := &Request{BodyBuffer: []byte(test.value)}
+		ereq := &Request{BodyMatchers: [][]byte{[]byte(test.value)}}
 		matches, err := MatchBody(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)

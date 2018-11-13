@@ -116,76 +116,80 @@ func MatchQueryParams(req *http.Request, ereq *Request) (bool, error) {
 // MatchBody tries to match the request body.
 // TODO: not too smart now, needs several improvements.
 func MatchBody(req *http.Request, ereq *Request) (bool, error) {
-	// If match body is empty, just continue
-	if req.Method == "HEAD" || len(ereq.BodyBuffer) == 0 {
-		return true, nil
-	}
+	for _, bodyBuffer := range ereq.BodyMatchers {
+		// If match body is empty, just continue
+		if req.Method == "HEAD" || len(bodyBuffer) == 0 {
+			continue
+		}
 
-	// Only can match certain MIME body types
-	if !supportedType(req) {
-		return false, nil
-	}
-
-	// Can only match certain compression schemes
-	if !supportedCompressionScheme(req) {
-		return false, nil
-	}
-
-	// Create a reader for the body depending on compression type
-	bodyReader := req.Body
-	if ereq.CompressionScheme != "" {
-		if ereq.CompressionScheme != req.Header.Get("Content-Encoding") {
+		// Only can match certain MIME body types
+		if !supportedType(req) {
 			return false, nil
 		}
-		compressedBodyReader, err := compressionReader(req.Body, ereq.CompressionScheme)
+
+		// Can only match certain compression schemes
+		if !supportedCompressionScheme(req) {
+			return false, nil
+		}
+
+		// Create a reader for the body depending on compression type
+		bodyReader := req.Body
+		if ereq.CompressionScheme != "" {
+			if ereq.CompressionScheme != req.Header.Get("Content-Encoding") {
+				return false, nil
+			}
+			compressedBodyReader, err := compressionReader(req.Body, ereq.CompressionScheme)
+			if err != nil {
+				return false, err
+			}
+			bodyReader = compressedBodyReader
+		}
+
+		// Read the whole request body
+		body, err := ioutil.ReadAll(bodyReader)
 		if err != nil {
 			return false, err
 		}
-		bodyReader = compressedBodyReader
-	}
 
-	// Read the whole request body
-	body, err := ioutil.ReadAll(bodyReader)
-	if err != nil {
-		return false, err
-	}
+		// Restore body reader stream
+		req.Body = createReadCloser(body)
 
-	// Restore body reader stream
-	req.Body = createReadCloser(body)
+		// If empty, ignore the match
+		if len(body) == 0 && len(bodyBuffer) != 0 {
+			return false, nil
+		}
 
-	// If empty, ignore the match
-	if len(body) == 0 && len(ereq.BodyBuffer) != 0 {
+		// Match body by atomic string comparison
+		bodyStr := castToString(body)
+		matchStr := castToString(bodyBuffer)
+		if bodyStr == matchStr {
+			continue
+		}
+
+		// Match request body by regexp
+		match, _ := regexp.MatchString(matchStr, bodyStr)
+		if match == true {
+			continue
+		}
+
+		// todo - add conditional do only perform the conversion of body bytes
+		// representation of JSON to a map and then compare them for equality.
+
+		// Check if the key + value pairs match
+		var bodyMap map[string]interface{}
+		var matchMap map[string]interface{}
+
+		// Ensure that both byte bodies that that should be JSON can be converted to maps.
+		umErr := json.Unmarshal(body, &bodyMap)
+		umErr2 := json.Unmarshal(bodyBuffer, &matchMap)
+		if umErr == nil && umErr2 == nil && reflect.DeepEqual(bodyMap, matchMap) {
+			continue
+		}
+
 		return false, nil
 	}
 
-	// Match body by atomic string comparison
-	bodyStr := castToString(body)
-	matchStr := castToString(ereq.BodyBuffer)
-	if bodyStr == matchStr {
-		return true, nil
-	}
-
-	// Match request body by regexp
-	match, _ := regexp.MatchString(matchStr, bodyStr)
-	if match == true {
-		return true, nil
-	}
-
-	// todo - add conditional do only perform the conversion of body bytes
-	// representation of JSON to a map and then compare them for equality.
-
-	// Check if the key + value pairs match
-	var bodyMap map[string]interface{}
-	var matchMap map[string]interface{}
-
-	// Ensure that both byte bodies that that should be JSON can be converted to maps.
-	umErr := json.Unmarshal(body, &bodyMap)
-	umErr2 := json.Unmarshal(ereq.BodyBuffer, &matchMap)
-	if umErr == nil && umErr2 == nil && reflect.DeepEqual(bodyMap, matchMap) {
-		return true, nil
-	}
-
-	return false, nil
+	return true, nil
 }
 
 func supportedType(req *http.Request) bool {

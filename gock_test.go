@@ -98,6 +98,23 @@ func TestMockBodyMatchJSON(t *testing.T) {
 	st.Expect(t, string(body)[:13], `{"bar":"foo"}`)
 }
 
+func TestMockBodyMatchMultiple(t *testing.T) {
+	defer after()
+	New("http://foo.com").
+		Post("/bar").
+		JSON(map[string]string{"foo": "bar", "baz": "foo"}).
+		BodyString("baz").
+		BodyString("bar").
+		Reply(201).
+		BodyString("intercepted")
+
+	res, err := http.Post("http://foo.com/bar", "application/json", bytes.NewBuffer([]byte(`{"foo":"bar", "baz":"foo"}`)))
+	st.Expect(t, err, nil)
+	st.Expect(t, res.StatusCode, 201)
+	body, _ := ioutil.ReadAll(res.Body)
+	st.Expect(t, string(body), `intercepted`)
+}
+
 func TestMockBodyCannotMatchJSON(t *testing.T) {
 	defer after()
 	New("http://foo.com").

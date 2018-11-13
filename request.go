@@ -47,8 +47,8 @@ type Request struct {
 	// Cookies stores the Request HTTP cookies values to match.
 	Cookies []*http.Cookie
 
-	// BodyBuffer stores the body data to match.
-	BodyBuffer []byte
+	// BodyMatchers stores the body data to match.
+	BodyMatchers [][]byte
 
 	// Mappers stores the request functions mappers used for matching.
 	Mappers []MapRequestFunc
@@ -125,19 +125,23 @@ func (r *Request) method(method, path string) *Request {
 
 // Body defines the body data to match based on a io.Reader interface.
 func (r *Request) Body(body io.Reader) *Request {
-	r.BodyBuffer, r.Error = ioutil.ReadAll(body)
+	var bodyBuffer []byte
+	bodyBuffer, r.Error = ioutil.ReadAll(body)
+	r.BodyMatchers = append(r.BodyMatchers, bodyBuffer)
 	return r
 }
 
 // BodyString defines the body to match based on a given string.
 func (r *Request) BodyString(body string) *Request {
-	r.BodyBuffer = []byte(body)
+	r.BodyMatchers = append(r.BodyMatchers, []byte(body))
 	return r
 }
 
 // File defines the body to match based on the given file path string.
 func (r *Request) File(path string) *Request {
-	r.BodyBuffer, r.Error = ioutil.ReadFile(path)
+	var bodyBuffer []byte
+	bodyBuffer, r.Error = ioutil.ReadFile(path)
+	r.BodyMatchers = append(r.BodyMatchers, bodyBuffer)
 	return r
 }
 
@@ -154,7 +158,10 @@ func (r *Request) JSON(data interface{}) *Request {
 	if r.Header.Get("Content-Type") == "" {
 		r.Header.Set("Content-Type", "application/json")
 	}
-	r.BodyBuffer, r.Error = readAndDecode(data, "json")
+
+	var bodyBuffer []byte
+	bodyBuffer, r.Error = readAndDecode(data, "json")
+	r.BodyMatchers = append(r.BodyMatchers, bodyBuffer)
 	return r
 }
 
@@ -163,7 +170,10 @@ func (r *Request) XML(data interface{}) *Request {
 	if r.Header.Get("Content-Type") == "" {
 		r.Header.Set("Content-Type", "application/xml")
 	}
-	r.BodyBuffer, r.Error = readAndDecode(data, "xml")
+
+	var bodyBuffer []byte
+	bodyBuffer, r.Error = readAndDecode(data, "xml")
+	r.BodyMatchers = append(r.BodyMatchers, bodyBuffer)
 	return r
 }
 
