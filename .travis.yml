@@ -7,6 +7,7 @@ go:
 
 before_install:
   - go get -u github.com/nbio/st
+  - go get -u github.com/codemodus/parth
   - go get -u gopkg.in/h2non/gentleman.v1
   - go get -u -v github.com/axw/gocov/gocov
   - go get -u -v github.com/mattn/goveralls
