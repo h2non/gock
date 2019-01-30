@@ -115,6 +115,7 @@ func MatchQueryParams(req *http.Request, ereq *Request) (bool, error) {
 	return true, nil
 }
 
+// MatchPathParams matches the URL path parameters of the given request.
 func MatchPathParams(req *http.Request, ereq *Request) (bool, error) {
 	for key, value := range ereq.PathParams {
 		var s string
