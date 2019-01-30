@@ -47,6 +47,9 @@ type Request struct {
 	// Cookies stores the Request HTTP cookies values to match.
 	Cookies []*http.Cookie
 
+	// PathParams stores the path parameters to match.
+	PathParams map[string]string
+
 	// BodyBuffer stores the body data to match.
 	BodyBuffer []byte
 
@@ -60,9 +63,10 @@ type Request struct {
 // NewRequest creates a new Request instance.
 func NewRequest() *Request {
 	return &Request{
-		Counter:   1,
-		URLStruct: &url.URL{},
-		Header:    make(http.Header),
+		Counter:    1,
+		URLStruct:  &url.URL{},
+		Header:     make(http.Header),
+		PathParams: make(map[string]string),
 	}
 }
 
@@ -219,6 +223,18 @@ func (r *Request) MatchParams(params map[string]string) *Request {
 // ParamPresent matches if the given query param key is present in the URL.
 func (r *Request) ParamPresent(key string) *Request {
 	r.MatchParam(key, ".*")
+	return r
+}
+
+// PathParam matches if a given path parameter key is present in the URL.
+//
+// The value is representative of the restful resource the key defines, e.g.
+//   // /users/123/name
+//   r.PathParam("users", "123")
+// would match.
+func (r *Request) PathParam(key, val string) *Request {
+	r.PathParams[key] = val
+
 	return r
 }
 

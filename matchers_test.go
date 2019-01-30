@@ -160,6 +160,33 @@ func TestMatchQueryParams(t *testing.T) {
 	}
 }
 
+func TestMatchPathParams(t *testing.T) {
+	cases := []struct {
+		key     string
+		value   string
+		path    string
+		matches bool
+	}{
+		{"foo", "bar", "/foo/bar", true},
+		{"foo", "bar", "/foo/test/bar", false},
+		{"foo", "bar", "/test/foo/bar/ack", true},
+		{"foo", "bar", "/foo", false},
+	}
+
+	for i, test := range cases {
+		u, _ := url.Parse("http://foo.com" + test.path)
+		mu, _ := url.Parse("http://foo.com" + test.path)
+		req := &http.Request{URL: u}
+		ereq := &Request{
+			URLStruct:  mu,
+			PathParams: map[string]string{test.key: test.value},
+		}
+		matches, err := MatchPathParams(req, ereq)
+		st.Expect(t, err, nil, i)
+		st.Expect(t, matches, test.matches, i)
+	}
+}
+
 func TestMatchBody(t *testing.T) {
 	cases := []struct {
 		value   string

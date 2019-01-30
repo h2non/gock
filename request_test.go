@@ -121,6 +121,12 @@ func TestRequestPresentParam(t *testing.T) {
 	st.Expect(t, req.URLStruct.Query().Get("key"), ".*")
 }
 
+func TestRequestPathParam(t *testing.T) {
+	req := NewRequest()
+	req.PathParam("key", "value")
+	st.Expect(t, req.PathParams["key"], "value")
+}
+
 func TestRequestPersist(t *testing.T) {
 	req := NewRequest()
 	st.Expect(t, req.Persisted, false)

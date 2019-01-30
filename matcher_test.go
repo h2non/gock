@@ -9,7 +9,7 @@ import (
 )
 
 func TestRegisteredMatchers(t *testing.T) {
-	st.Expect(t, len(MatchersHeader), 6)
+	st.Expect(t, len(MatchersHeader), 7)
 	st.Expect(t, len(MatchersBody), 1)
 }
 

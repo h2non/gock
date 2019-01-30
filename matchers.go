@@ -9,6 +9,8 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+
+	"github.com/codemodus/parth"
 )
 
 // EOL represents the end of line character.
@@ -107,6 +109,21 @@ func MatchQueryParams(req *http.Request, ereq *Request) (bool, error) {
 		}
 
 		if !match {
+			return false, nil
+		}
+	}
+	return true, nil
+}
+
+func MatchPathParams(req *http.Request, ereq *Request) (bool, error) {
+	for key, value := range ereq.PathParams {
+		var s string
+
+		if err := parth.Sequent(req.URL.Path, key, &s); err != nil {
+			return false, nil
+		}
+
+		if s != value {
 			return false, nil
 		}
 	}
