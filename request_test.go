@@ -84,6 +84,12 @@ func TestRequestMatchType(t *testing.T) {
 	st.Expect(t, req.Header.Get("Content-Type"), "foo/bar")
 }
 
+func TestRequestBasicAuth(t *testing.T) {
+	req := NewRequest()
+	req.BasicAuth("bob", "qwerty")
+	st.Expect(t, req.Header.Get("Authorization"), "Basic Ym9iOnF3ZXJ0eQ==")
+}
+
 func TestRequestMatchHeader(t *testing.T) {
 	req := NewRequest()
 	req.MatchHeader("foo", "bar")

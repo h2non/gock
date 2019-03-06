@@ -1,6 +1,7 @@
 package gock
 
 import (
+	"encoding/base64"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -182,6 +183,12 @@ func (r *Request) MatchType(kind string) *Request {
 	return r
 }
 
+// BasicAuth defines a username and password for HTTP Basic Authentication
+func (r *Request) BasicAuth(username, password string) *Request {
+	r.Header.Set("Authorization", "Basic "+basicAuth(username, password))
+	return r
+}
+
 // MatchHeader defines a new key and value header to match.
 func (r *Request) MatchHeader(key, value string) *Request {
 	r.Header.Set(key, value)
@@ -296,4 +303,14 @@ func (r *Request) ReplyError(err error) *Response {
 func (r *Request) ReplyFunc(replier func(*Response)) *Response {
 	replier(r.Response)
 	return r.Response
+}
+
+// See 2 (end of page 4) https://www.ietf.org/rfc/rfc2617.txt
+// "To receive authorization, the client sends the userid and password,
+// separated by a single colon (":") character, within a base64
+// encoded string in the credentials."
+// It is not meant to be urlencoded.
+func basicAuth(username, password string) string {
+	auth := username + ":" + password
+	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
