@@ -54,19 +54,21 @@ func TestMatchScheme(t *testing.T) {
 
 func TestMatchHost(t *testing.T) {
 	cases := []struct {
-		value   string
-		url     string
-		matches bool
+		value            string
+		url              string
+		matches          bool
+		matchesNonRegexp bool
 	}{
-		{"foo.com", "foo.com", true},
-		{"FOO.com", "foo.com", true},
-		{"foo.net", "foo.com", false},
-		{"foo", "foo.com", true},
-		{"(.*).com", "foo.com", true},
-		{"127.0.0.1", "127.0.0.1", true},
-		{"127.0.0.2", "127.0.0.1", false},
-		{"127.0.0.*", "127.0.0.1", true},
-		{"127.0.0.[0-9]", "127.0.0.7", true},
+		{"foo.com", "foo.com", true, true},
+		{"FOO.com", "foo.com", true, true},
+		{"foo.net", "foo.com", false, false},
+		{"foo.bar.net", "foo-bar.net", true, false},
+		{"foo", "foo.com", true, false},
+		{"(.*).com", "foo.com", true, false},
+		{"127.0.0.1", "127.0.0.1", true, true},
+		{"127.0.0.2", "127.0.0.1", false, false},
+		{"127.0.0.*", "127.0.0.1", true, false},
+		{"127.0.0.[0-9]", "127.0.0.7", true, false},
 	}
 
 	for _, test := range cases {
@@ -75,6 +77,10 @@ func TestMatchHost(t *testing.T) {
 		matches, err := MatchHost(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
+		ereq.WithOptions(Options{DisableRegexpHost: true})
+		matches, err = MatchHost(req, ereq)
+		st.Expect(t, err, nil)
+		st.Expect(t, matches, test.matchesNonRegexp)
 	}
 }
 

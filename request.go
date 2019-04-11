@@ -33,6 +33,9 @@ type Request struct {
 	// Persisted stores if the current mock should be always active.
 	Persisted bool
 
+	// Options stores options for current Request.
+	Options Options
+
 	// URLStruct stores the parsed URL as *url.URL struct.
 	URLStruct *url.URL
 
@@ -248,6 +251,12 @@ func (r *Request) PathParam(key, val string) *Request {
 // Persist defines the current HTTP mock as persistent and won't be removed after intercepting it.
 func (r *Request) Persist() *Request {
 	r.Persisted = true
+	return r
+}
+
+// WithOptions sets the options for the request.
+func (r *Request) WithOptions(options Options) *Request {
+	r.Options = options
 	return r
 }
 
