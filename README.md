@@ -85,7 +85,7 @@ disabling `gock` once you are done with your HTTP testing logic.
 A Go idiomatic approach for doing this can be using it in a `defer` statement, such as:
 
 ```go
-function TestGock (t *testing.T) {
+func TestGock (t *testing.T) {
 	defer gock.Off()
 
 	// ... my test code goes here
@@ -107,7 +107,7 @@ As a good testing pattern, you should call `gock.RestoreClient(client)` after ru
 You can also use a `defer` statement for doing it, as you do with `gock.Off()`, such as:
 
 ```go
-function TestGock (t *testing.T) {
+func TestGock (t *testing.T) {
 	defer gock.Off()
 	defer gock.RestoreClient(client)
 
