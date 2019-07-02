@@ -71,6 +71,11 @@ func TestMatcherFlush(t *testing.T) {
 	st.Expect(t, len(matcher.Get()), 0)
 }
 
+func TestMatcherClone(t *testing.T) {
+	matcher := DefaultMatcher.Clone()
+	st.Expect(t, len(matcher.Get()), len(DefaultMatcher.Get()))
+}
+
 func TestMatcher(t *testing.T) {
 	cases := []struct {
 		method  string
