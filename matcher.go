@@ -95,6 +95,7 @@ func (m *MockMatcher) Flush() {
 	m.Matchers = []MatchFunc{}
 }
 
+// Clone returns a separate MockMatcher instance that has a copy of the same MatcherFuncs
 func (m *MockMatcher) Clone() *MockMatcher {
 	m2 := NewEmptyMatcher()
 	for _, mFn := range m.Get() {
