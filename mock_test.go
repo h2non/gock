@@ -14,7 +14,7 @@ func TestNewMock(t *testing.T) {
 	res := NewResponse()
 	mock := NewMock(req, res)
 	st.Expect(t, mock.disabled, false)
-	st.Expect(t, mock.matcher, DefaultMatcher)
+	st.Expect(t, len(mock.matcher.Get()), len(DefaultMatcher.Get()))
 
 	st.Expect(t, mock.Request(), req)
 	st.Expect(t, mock.Request().Mock, mock)
@@ -71,7 +71,7 @@ func TestMockSetMatcher(t *testing.T) {
 	res := NewResponse()
 	mock := NewMock(req, res)
 
-	st.Expect(t, mock.matcher, DefaultMatcher)
+	st.Expect(t, len(mock.matcher.Get()), len(DefaultMatcher.Get()))
 	matcher := NewMatcher()
 	matcher.Flush()
 	matcher.Add(func(req *http.Request, ereq *Request) (bool, error) {
@@ -93,7 +93,7 @@ func TestMockAddMatcher(t *testing.T) {
 	res := NewResponse()
 	mock := NewMock(req, res)
 
-	st.Expect(t, mock.matcher, DefaultMatcher)
+	st.Expect(t, len(mock.matcher.Get()), len(DefaultMatcher.Get()))
 	matcher := NewMatcher()
 	matcher.Flush()
 	mock.SetMatcher(matcher)
