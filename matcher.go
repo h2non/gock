@@ -54,15 +54,23 @@ type MockMatcher struct {
 // NewMatcher creates a new mock matcher
 // using the default matcher functions.
 func NewMatcher() *MockMatcher {
-	return &MockMatcher{Matchers: Matchers}
+	m := NewEmptyMatcher()
+	for _, matchFn := range gock.Matchers{
+		m.Add(matchFn)
+	}
+	return m
 }
 
 // NewBasicMatcher creates a new matcher with header only mock matchers.
 func NewBasicMatcher() *MockMatcher {
-	return &MockMatcher{Matchers: MatchersHeader}
+	m := NewEmptyMatcher()
+	for _, matchFn := range gock.MatchersHeader{
+		m.Add(matchFn)
+	}
+	return m
 }
 
-// NewEmptyMatcher creates a new empty matcher with out default amtchers.
+// NewEmptyMatcher creates a new empty matcher without default matchers.
 func NewEmptyMatcher() *MockMatcher {
 	return &MockMatcher{Matchers: []MatchFunc{}}
 }
