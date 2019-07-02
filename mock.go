@@ -55,7 +55,7 @@ func NewMock(req *Request, res *Response) *Mocker {
 	mock := &Mocker{
 		request:  req,
 		response: res,
-		matcher:  DefaultMatcher,
+		matcher:  DefaultMatcher.Clone(),
 	}
 	res.Mock = mock
 	req.Mock = mock
