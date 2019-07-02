@@ -95,6 +95,14 @@ func (m *MockMatcher) Flush() {
 	m.Matchers = []MatchFunc{}
 }
 
+func (m *MockMatcher) Clone() *MockMatcher {
+	m2 := NewEmptyMatcher()
+	for _, mFn := range m.Get() {
+		m2.Add(mFn)
+	}
+	return m2
+}
+
 // Match matches the given http.Request with a mock request
 // returning true in case that the request matches, otherwise false.
 func (m *MockMatcher) Match(req *http.Request, ereq *Request) (bool, error) {
