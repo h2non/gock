@@ -191,6 +191,41 @@ func TestMatchHeaders(t *testing.T) {
 }
 ```
 
+#### Request param matching
+
+```go
+package test
+
+import (
+  "github.com/nbio/st"
+  "gopkg.in/h2non/gock.v1"
+  "io/ioutil"
+  "net/http"
+  "testing"
+)
+
+func TestMatchHeaders(t *testing.T) {
+  defer gock.Off()
+
+  gock.New("http://foo.com").
+    MatchParam("page", "1").
+    MatchParam("per_page", "10").
+    Reply(200).
+    BodyString("foo foo")
+
+  req, err := http.NewRequest("GET", "http://foo.com?page=1&per_page=10", nil)
+
+  res, err := (&http.Client{}).Do(req)
+  st.Expect(t, err, nil)
+  st.Expect(t, res.StatusCode, 200)
+  body, _ := ioutil.ReadAll(res.Body)
+  st.Expect(t, string(body), "foo foo")
+
+  // Verify that we don't have pending mocks
+  st.Expect(t, gock.IsDone(), true)
+}
+```
+
 #### JSON body matching and response
 
 ```go
