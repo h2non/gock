@@ -127,6 +127,8 @@ func TestMatchHeaders(t *testing.T) {
 		{http.Header{"foo": []string{"b(.*)"}}, http.Header{"foo": []string{"barbar"}}, true},
 		{http.Header{"foo": []string{"^bar$"}}, http.Header{"foo": []string{"bar"}}, true},
 		{http.Header{"foo": []string{"^bar$"}}, http.Header{"foo": []string{"barbar"}}, false},
+		{http.Header{"UPPERCASE": []string{"bar"}}, http.Header{"UPPERCASE": []string{"bar"}}, true},
+		{http.Header{"Mixed-CASE": []string{"bar"}}, http.Header{"Mixed-CASE": []string{"bar"}}, true},
 	}
 
 	for _, test := range cases {
