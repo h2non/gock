@@ -94,13 +94,13 @@ func TestRequestMatchHeader(t *testing.T) {
 	req := NewRequest()
 	req.MatchHeader("foo", "bar")
 	req.MatchHeader("bar", "baz")
-	req.MatchHeader("UPPERCASE","bat")
-	req.MatchHeader("Mixed-CASE","foo")
+	req.MatchHeader("UPPERCASE", "bat")
+	req.MatchHeader("Mixed-CASE", "foo")
 
-	st.Expect(t, req.Header["foo"][0],"bar")
-	st.Expect(t, req.Header["bar"][0],"baz")
-	st.Expect(t, req.Header["UPPERCASE"][0],"bat")
-	st.Expect(t, req.Header["Mixed-CASE"][0],"foo")
+	st.Expect(t, req.Header["foo"][0], "bar")
+	st.Expect(t, req.Header["bar"][0], "baz")
+	st.Expect(t, req.Header["UPPERCASE"][0], "bat")
+	st.Expect(t, req.Header["Mixed-CASE"][0], "foo")
 }
 
 func TestRequestHeaderPresent(t *testing.T) {
@@ -109,10 +109,10 @@ func TestRequestHeaderPresent(t *testing.T) {
 	req.HeaderPresent("bar")
 	req.HeaderPresent("UPPERCASE")
 	req.HeaderPresent("Mixed-CASE")
-	st.Expect(t, req.Header["foo"][0],".*")
-	st.Expect(t, req.Header["bar"][0],".*")
-	st.Expect(t, req.Header["UPPERCASE"][0],".*")
-	st.Expect(t, req.Header["Mixed-CASE"][0],".*")
+	st.Expect(t, req.Header["foo"][0], ".*")
+	st.Expect(t, req.Header["bar"][0], ".*")
+	st.Expect(t, req.Header["UPPERCASE"][0], ".*")
+	st.Expect(t, req.Header["Mixed-CASE"][0], ".*")
 }
 
 func TestRequestMatchParam(t *testing.T) {
