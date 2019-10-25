@@ -20,7 +20,7 @@ func TestMatchHeaders(t *testing.T) {
 
 	req, err := http.NewRequest("GET", "http://foo.com", nil)
 	req.Header.Set("Authorization", "foo bar")
-	req.Header.Set("API", "1.0")
+	req.Header["API"]=[]string{ "1.0"}
 	req.Header.Set("Accept", "text/plain")
 
 	res, err := (&http.Client{}).Do(req)
