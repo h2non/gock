@@ -207,7 +207,7 @@ func (r *Request) HeaderPresent(key string) *Request {
 // MatchHeaders defines a map of key-value headers to match.
 func (r *Request) MatchHeaders(headers map[string]string) *Request {
 	for key, value := range headers {
-		r.Header[key] =  []string{value}
+		r.Header[key] = []string{value}
 	}
 	return r
 }
