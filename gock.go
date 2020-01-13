@@ -61,7 +61,9 @@ func Intercepting() bool {
 // If you are using a custom HTTP transport, you have to use `gock.Transport()`
 func Intercept() {
 	if !Intercepting() {
+		mutex.Lock()
 		http.DefaultTransport = DefaultTransport
+		mutex.Unlock()
 	}
 }
 
