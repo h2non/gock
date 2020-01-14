@@ -77,6 +77,8 @@ func NewEmptyMatcher() *MockMatcher {
 
 // Get returns a slice of registered function matchers.
 func (m *MockMatcher) Get() []MatchFunc {
+	mutex.Lock()
+	defer mutex.Unlock()
 	return m.Matchers
 }
 
