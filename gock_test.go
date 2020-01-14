@@ -430,7 +430,7 @@ func TestObserve(t *testing.T) {
 }
 
 func TestTryCreatingRacesInNew(t *testing.T) {
-	for i := 0; i < 10; {
+	for i := 0; i < 10; i++ {
 		go func() {
 			New("http://example.com")
 		}()
