@@ -17,8 +17,8 @@ func Register(mock Mock) {
 	}
 
 	// Make ops thread safe
-	mutex.Lock()
-	defer mutex.Unlock()
+	storeMutex.Lock()
+	defer storeMutex.Unlock()
 
 	// Expose mock in request/response for delegation
 	mock.Request().Mock = mock
