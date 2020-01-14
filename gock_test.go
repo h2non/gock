@@ -429,6 +429,14 @@ func TestObserve(t *testing.T) {
 	st.Expect(t, observedMock.Request().URLStruct.Host, "observe-foo.com")
 }
 
+func TestTryCreatingRacesInNew(t *testing.T) {
+	for i := 0; i < 100; {
+		go func() {
+			New("http://example.com")
+		}()
+	}
+}
+
 func after() {
 	Flush()
 	Disable()
