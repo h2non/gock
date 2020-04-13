@@ -204,7 +204,7 @@ import (
   "testing"
 )
 
-func TestMatchHeaders(t *testing.T) {
+func TestMatchParams(t *testing.T) {
   defer gock.Off()
 
   gock.New("http://foo.com").
