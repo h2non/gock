@@ -81,7 +81,7 @@ func MatchHeaders(req *http.Request, ereq *Request) (bool, error) {
 
 		for _, field := range req.Header[key] {
 			match, err = regexp.MatchString(value[0], field)
-			//Some values may contain reserved regex params e.g. "()", try matching with these escaped
+			// Some values may contain reserved regex params e.g. "()", try matching with these escaped.
 			matchEscaped, err = regexp.MatchString(regexp.QuoteMeta(value[0]), field)
 
 			if err != nil {

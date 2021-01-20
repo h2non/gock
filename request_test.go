@@ -15,7 +15,7 @@ func TestNewRequest(t *testing.T) {
 	st.Expect(t, req.URLStruct.Host, "foo.com")
 	st.Expect(t, req.URLStruct.Scheme, "http")
 	req.MatchHeader("foo", "bar")
-	st.Expect(t, req.Header["foo"][0], "bar")
+	st.Expect(t, req.Header.Get("foo"), "bar")
 }
 
 func TestRequestSetURL(t *testing.T) {
@@ -97,10 +97,10 @@ func TestRequestMatchHeader(t *testing.T) {
 	req.MatchHeader("UPPERCASE", "bat")
 	req.MatchHeader("Mixed-CASE", "foo")
 
-	st.Expect(t, req.Header["foo"][0], "bar")
-	st.Expect(t, req.Header["bar"][0], "baz")
-	st.Expect(t, req.Header["UPPERCASE"][0], "bat")
-	st.Expect(t, req.Header["Mixed-CASE"][0], "foo")
+	st.Expect(t, req.Header.Get("foo"), "bar")
+	st.Expect(t, req.Header.Get("bar"), "baz")
+	st.Expect(t, req.Header.Get("UPPERCASE"), "bat")
+	st.Expect(t, req.Header.Get("Mixed-CASE"), "foo")
 }
 
 func TestRequestHeaderPresent(t *testing.T) {
@@ -109,10 +109,10 @@ func TestRequestHeaderPresent(t *testing.T) {
 	req.HeaderPresent("bar")
 	req.HeaderPresent("UPPERCASE")
 	req.HeaderPresent("Mixed-CASE")
-	st.Expect(t, req.Header["foo"][0], ".*")
-	st.Expect(t, req.Header["bar"][0], ".*")
-	st.Expect(t, req.Header["UPPERCASE"][0], ".*")
-	st.Expect(t, req.Header["Mixed-CASE"][0], ".*")
+	st.Expect(t, req.Header.Get("foo"), ".*")
+	st.Expect(t, req.Header.Get("bar"), ".*")
+	st.Expect(t, req.Header.Get("UPPERCASE"), ".*")
+	st.Expect(t, req.Header.Get("Mixed-CASE"), ".*")
 }
 
 func TestRequestMatchParam(t *testing.T) {

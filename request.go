@@ -194,20 +194,20 @@ func (r *Request) BasicAuth(username, password string) *Request {
 
 // MatchHeader defines a new key and value header to match.
 func (r *Request) MatchHeader(key, value string) *Request {
-	r.Header[key] = []string{value}
+	r.Header.Set(key, value)
 	return r
 }
 
 // HeaderPresent defines that a header field must be present in the request.
 func (r *Request) HeaderPresent(key string) *Request {
-	r.Header[key] = []string{".*"}
+	r.Header.Set(key, ".*")
 	return r
 }
 
 // MatchHeaders defines a map of key-value headers to match.
 func (r *Request) MatchHeaders(headers map[string]string) *Request {
 	for key, value := range headers {
-		r.Header[key] = []string{value}
+		r.Header.Set(key, value)
 	}
 	return r
 }
