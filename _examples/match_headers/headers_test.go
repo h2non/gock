@@ -1,11 +1,12 @@
 package test
 
 import (
-	"github.com/nbio/st"
-	"gopkg.in/h2non/gock.v1"
 	"io/ioutil"
 	"net/http"
 	"testing"
+
+	"github.com/nbio/st"
+	"gopkg.in/h2non/gock.v1"
 )
 
 func TestMatchHeaders(t *testing.T) {
@@ -20,7 +21,7 @@ func TestMatchHeaders(t *testing.T) {
 
 	req, err := http.NewRequest("GET", "http://foo.com", nil)
 	req.Header.Set("Authorization", "foo bar")
-	req.Header["API"] = []string{"1.0"}
+	req.Header.Set("API", "1.0")
 	req.Header.Set("Accept", "text/plain")
 
 	res, err := (&http.Client{}).Do(req)
