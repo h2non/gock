@@ -23,4 +23,7 @@ func TestPersistent(t *testing.T) {
 		body, _ := ioutil.ReadAll(res.Body)
 		st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 	}
+
+	// Verify that we don't have pending mocks
+	st.Expect(t, gock.IsDone(), true)
 }
