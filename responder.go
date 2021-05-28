@@ -52,7 +52,25 @@ func Responder(req *http.Request, mock *Response, res *http.Response) (*http.Res
 
 	// Sleep to simulate delay, if necessary
 	if mock.ResponseDelay > 0 {
-		time.Sleep(mock.ResponseDelay)
+		// allow escaping from sleep due to request context expiration or cancellation
+		t := time.NewTimer(mock.ResponseDelay)
+		select {
+		case <-t.C:
+		case <-req.Context().Done():
+			// cleanly stop the timer
+			if !t.Stop() {
+				<-t.C
+			}
+		}
+	}
+
+	// check if the request context has ended. we could put this up in the delay code above, but putting it here
+	// has the added benefit of working even when there is no delay (very small timeouts, already-done contexts, etc.)
+	if err = req.Context().Err(); err != nil {
+		// cleanly close the response and return the context error
+		io.Copy(ioutil.Discard, res.Body)
+		res.Body.Close()
+		return nil, err
 	}
 
 	return res, err
