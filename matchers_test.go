@@ -222,3 +222,30 @@ func TestMatchBody(t *testing.T) {
 		st.Expect(t, matches, test.matches)
 	}
 }
+
+func TestMatchBody_MatchType(t *testing.T) {
+	body := `{"foo":"bar"}`
+	cases := []struct {
+		body               string
+		requestContentType string
+		customBodyType     string
+		matches            bool
+	}{
+		{body, "application/vnd.apiname.v1+json", "foobar", false},
+		{body, "application/vnd.apiname.v1+json", "application/vnd.apiname.v1+json", true},
+		{body, "application/json", "foobar", false},
+		{body, "application/json", "", true},
+		{"", "", "", true},
+	}
+
+	for _, test := range cases {
+		req := &http.Request{
+			Header: http.Header{"Content-Type": []string{test.requestContentType}},
+			Body:   createReadCloser([]byte(test.body)),
+		}
+		ereq := NewRequest().BodyString(test.body).MatchType(test.customBodyType)
+		matches, err := MatchBody(req, ereq)
+		st.Expect(t, err, nil)
+		st.Expect(t, matches, test.matches)
+	}
+}

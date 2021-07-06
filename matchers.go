@@ -148,7 +148,7 @@ func MatchBody(req *http.Request, ereq *Request) (bool, error) {
 	}
 
 	// Only can match certain MIME body types
-	if !supportedType(req) {
+	if !supportedType(req, ereq) {
 		return false, nil
 	}
 
@@ -214,10 +214,15 @@ func MatchBody(req *http.Request, ereq *Request) (bool, error) {
 	return false, nil
 }
 
-func supportedType(req *http.Request) bool {
+func supportedType(req *http.Request, ereq *Request) bool {
 	mime := req.Header.Get("Content-Type")
 	if mime == "" {
 		return true
+	}
+
+	mimeToMatch := ereq.Header.Get("Content-Type")
+	if mimeToMatch != "" {
+		return mime == mimeToMatch
 	}
 
 	for _, kind := range BodyTypes {

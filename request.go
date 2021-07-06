@@ -176,7 +176,7 @@ func (r *Request) XML(data interface{}) *Request {
 }
 
 // MatchType defines the request Content-Type MIME header field.
-// Supports type alias. E.g: json, xml, form, text...
+// Supports custom MIME types and type aliases. E.g: json, xml, form, text...
 func (r *Request) MatchType(kind string) *Request {
 	mime := BodyTypeAliases[kind]
 	if mime != "" {
