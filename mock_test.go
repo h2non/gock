@@ -13,7 +13,7 @@ func TestNewMock(t *testing.T) {
 	req := NewRequest()
 	res := NewResponse()
 	mock := NewMock(req, res)
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	st.Expect(t, len(mock.matcher.Get()), len(DefaultMatcher.Get()))
 
 	st.Expect(t, mock.Request(), req)
@@ -29,9 +29,9 @@ func TestMockDisable(t *testing.T) {
 	res := NewResponse()
 	mock := NewMock(req, res)
 
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	mock.Disable()
-	st.Expect(t, mock.disabled, true)
+	st.Expect(t, mock.disabler.isDisabled(), true)
 
 	matches, err := mock.Match(&http.Request{})
 	st.Expect(t, err, nil)
@@ -45,21 +45,21 @@ func TestMockDone(t *testing.T) {
 	res := NewResponse()
 
 	mock := NewMock(req, res)
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	st.Expect(t, mock.Done(), false)
 
 	mock = NewMock(req, res)
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	mock.Disable()
 	st.Expect(t, mock.Done(), true)
 
 	mock = NewMock(req, res)
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	mock.request.Counter = 0
 	st.Expect(t, mock.Done(), true)
 
 	mock = NewMock(req, res)
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	mock.request.Persisted = true
 	st.Expect(t, mock.Done(), false)
 }
@@ -79,7 +79,7 @@ func TestMockSetMatcher(t *testing.T) {
 	})
 	mock.SetMatcher(matcher)
 	st.Expect(t, len(mock.matcher.Get()), 1)
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 
 	matches, err := mock.Match(&http.Request{})
 	st.Expect(t, err, nil)
@@ -100,7 +100,7 @@ func TestMockAddMatcher(t *testing.T) {
 	mock.AddMatcher(func(req *http.Request, ereq *Request) (bool, error) {
 		return true, nil
 	})
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	st.Expect(t, mock.matcher, matcher)
 
 	matches, err := mock.Match(&http.Request{})
@@ -127,7 +127,7 @@ func TestMockMatch(t *testing.T) {
 		calls++
 		return true, nil
 	})
-	st.Expect(t, mock.disabled, false)
+	st.Expect(t, mock.disabler.isDisabled(), false)
 	st.Expect(t, mock.matcher, matcher)
 
 	matches, err := mock.Match(&http.Request{})

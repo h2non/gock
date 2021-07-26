@@ -146,7 +146,7 @@ func TestResponseEnableNetworking(t *testing.T) {
 
 func TestResponseDone(t *testing.T) {
 	res := NewResponse()
-	res.Mock = &Mocker{request: &Request{Counter: 1}}
+	res.Mock = &Mocker{request: &Request{Counter: 1}, disabler: new(disabler)}
 	st.Expect(t, res.Done(), false)
 	res.Mock.Disable()
 	st.Expect(t, res.Done(), true)

@@ -33,10 +33,10 @@ type Mock interface {
 // Mocker implements a Mock capable interface providing
 // a default mock configuration used internally to store mocks.
 type Mocker struct {
-	// disabled stores if the current mock is disabled.
-	disabled bool
+	// disabler stores a disabler for thread safety checking current mock is disabled
+	disabler *disabler
 
-	// mutex stores the mock mutex for thread safity.
+	// mutex stores the mock mutex for thread safety.
 	mutex sync.Mutex
 
 	// matcher stores a Matcher capable instance to match the given http.Request.
@@ -49,10 +49,31 @@ type Mocker struct {
 	response *Response
 }
 
+type disabler struct {
+	// disabled stores if the current mock is disabled.
+	disabled bool
+
+	// mutex stores the disabler mutex for thread safety.
+	mutex sync.RWMutex
+}
+
+func (d *disabler) isDisabled() bool {
+	d.mutex.RLock()
+	defer d.mutex.RUnlock()
+	return d.disabled
+}
+
+func (d *disabler) Disable() {
+	d.mutex.Lock()
+	defer d.mutex.Unlock()
+	d.disabled = true
+}
+
 // NewMock creates a new HTTP mock based on the given request and response instances.
 // It's mostly used internally.
 func NewMock(req *Request, res *Response) *Mocker {
 	mock := &Mocker{
+		disabler: new(disabler),
 		request:  req,
 		response: res,
 		matcher:  DefaultMatcher.Clone(),
@@ -65,15 +86,20 @@ func NewMock(req *Request, res *Response) *Mocker {
 
 // Disable disables the current mock manually.
 func (m *Mocker) Disable() {
-	m.disabled = true
+	m.disabler.Disable()
 }
 
 // Done returns true in case that the current mock
 // instance is disabled and therefore must be removed.
 func (m *Mocker) Done() bool {
+	// prevent deadlock with m.mutex
+	if m.disabler.isDisabled() {
+		return true
+	}
+
 	m.mutex.Lock()
 	defer m.mutex.Unlock()
-	return m.disabled || (!m.request.Persisted && m.request.Counter == 0)
+	return !m.request.Persisted && m.request.Counter == 0
 }
 
 // Request returns the Request instance
@@ -91,7 +117,7 @@ func (m *Mocker) Response() *Response {
 // Match matches the given http.Request with the current Request
 // mock expectation, returning true if matches.
 func (m *Mocker) Match(req *http.Request) (bool, error) {
-	if m.disabled {
+	if m.disabler.isDisabled() {
 		return false, nil
 	}
 
@@ -141,6 +167,6 @@ func (m *Mocker) decrement() {
 
 	m.request.Counter--
 	if m.request.Counter == 0 {
-		m.disabled = true
+		m.disabler.Disable()
 	}
 }
