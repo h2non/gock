@@ -28,7 +28,7 @@ func Register(mock Mock) {
 	mocks = append(mocks, mock)
 }
 
-// GetAll returns the current stack of registed mocks.
+// GetAll returns the current stack of registered mocks.
 func GetAll() []Mock {
 	storeMutex.RLock()
 	defer storeMutex.RUnlock()
