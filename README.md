@@ -29,7 +29,7 @@ To get started, take a look to the [examples](#examples).
 ## Installation
 
 ```bash
-go get -u github.com/h2non/gock
+go get -u gopkg.in/h2non/gock.v1
 ```
 
 ## API
@@ -130,7 +130,7 @@ import (
   "testing"
 
   "github.com/nbio/st"
-  "github.com/h2non/gock"
+  "gopkg.in/h2non/gock.v1"
 )
 
 func TestSimple(t *testing.T) {
@@ -164,7 +164,7 @@ import (
   "testing"
 
   "github.com/nbio/st"
-  "github.com/h2non/gock"
+  "gopkg.in/h2non/gock.v1"
 )
 
 func TestMatchHeaders(t *testing.T) {
@@ -204,7 +204,7 @@ import (
   "testing"
 
   "github.com/nbio/st"
-  "github.com/h2non/gock"
+  "gopkg.in/h2non/gock.v1"
 )
 
 func TestMatchParams(t *testing.T) {
@@ -239,9 +239,9 @@ import (
   "io/ioutil"
   "net/http"
   "testing"
-	
+
 	"github.com/nbio/st"
-  "github.com/h2non/gock"
+  "gopkg.in/h2non/gock.v1"
 )
 
 func TestMockSimple(t *testing.T) {
@@ -278,7 +278,7 @@ import (
   "testing"
 
   "github.com/nbio/st"
-  "github.com/h2non/gock"
+  "gopkg.in/h2non/gock.v1"
 )
 
 func TestClient(t *testing.T) {
@@ -313,7 +313,7 @@ import (
   "io/ioutil"
   "net/http"
 
-  "github.com/h2non/gock"
+  "gopkg.in/h2non/gock.v1"
 )
 
 func main() {
@@ -349,8 +349,8 @@ package main
 import (
 	"bytes"
 	"net/http"
-	
-  "github.com/h2non/gock"
+
+  "gopkg.in/h2non/gock.v1"
 )
 
 func main() {
