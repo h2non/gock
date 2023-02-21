@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 
 	"github.com/h2non/gock"
@@ -28,6 +28,6 @@ func main() {
 	// The server header comes from mock as well
 	fmt.Printf("Server header: %s\n", res.Header.Get("Server"))
 	// Response body is the original
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	fmt.Printf("Body: %s", string(body))
 }

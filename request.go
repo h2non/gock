@@ -3,9 +3,9 @@ package gock
 import (
 	"encoding/base64"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 )
 
@@ -133,7 +133,7 @@ func (r *Request) method(method, path string) *Request {
 
 // Body defines the body data to match based on a io.Reader interface.
 func (r *Request) Body(body io.Reader) *Request {
-	r.BodyBuffer, r.Error = ioutil.ReadAll(body)
+	r.BodyBuffer, r.Error = io.ReadAll(body)
 	return r
 }
 
@@ -145,7 +145,7 @@ func (r *Request) BodyString(body string) *Request {
 
 // File defines the body to match based on the given file path string.
 func (r *Request) File(path string) *Request {
-	r.BodyBuffer, r.Error = ioutil.ReadFile(path)
+	r.BodyBuffer, r.Error = os.ReadFile(path)
 	return r
 }
 
@@ -239,8 +239,10 @@ func (r *Request) ParamPresent(key string) *Request {
 // PathParam matches if a given path parameter key is present in the URL.
 //
 // The value is representative of the restful resource the key defines, e.g.
-//   // /users/123/name
-//   r.PathParam("users", "123")
+//
+//	// /users/123/name
+//	r.PathParam("users", "123")
+//
 // would match.
 func (r *Request) PathParam(key, val string) *Request {
 	r.PathParams[key] = val

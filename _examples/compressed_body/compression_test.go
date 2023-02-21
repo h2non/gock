@@ -3,11 +3,12 @@ package test
 import (
 	"bytes"
 	"compress/gzip"
-	"github.com/nbio/st"
-	"github.com/h2non/gock"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/nbio/st"
 )
 
 func TestMockSimple(t *testing.T) {
@@ -33,6 +34,6 @@ func TestMockSimple(t *testing.T) {
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
 
-	resBody, _ := ioutil.ReadAll(res.Body)
+	resBody, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(resBody)[:13], `{"bar":"foo"}`)
 }

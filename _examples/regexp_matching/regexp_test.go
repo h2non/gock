@@ -2,11 +2,12 @@ package test
 
 import (
 	"bytes"
-	"github.com/nbio/st"
-	"github.com/h2non/gock"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/nbio/st"
 )
 
 func TestRegExpMatching(t *testing.T) {
@@ -26,6 +27,6 @@ func TestRegExpMatching(t *testing.T) {
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 200)
 	st.Expect(t, res.Header.Get("Server"), "gock")
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 }

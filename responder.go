@@ -3,7 +3,6 @@ package gock
 import (
 	"bytes"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
@@ -68,7 +67,7 @@ func Responder(req *http.Request, mock *Response, res *http.Response) (*http.Res
 	// has the added benefit of working even when there is no delay (very small timeouts, already-done contexts, etc.)
 	if err = req.Context().Err(); err != nil {
 		// cleanly close the response and return the context error
-		io.Copy(ioutil.Discard, res.Body)
+		io.Copy(io.Discard, res.Body)
 		res.Body.Close()
 		return nil, err
 	}
@@ -101,5 +100,5 @@ func mergeHeaders(res *http.Response, mres *Response) http.Header {
 // createReadCloser creates an io.ReadCloser from a byte slice that is suitable for use as an
 // http response body.
 func createReadCloser(body []byte) io.ReadCloser {
-	return ioutil.NopCloser(bytes.NewReader(body))
+	return io.NopCloser(bytes.NewReader(body))
 }

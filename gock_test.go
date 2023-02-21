@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"compress/gzip"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -19,7 +19,7 @@ func TestMockSimple(t *testing.T) {
 	res, err := http.Get("http://foo.com")
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 }
 
@@ -36,7 +36,7 @@ func TestMockBodyStringResponse(t *testing.T) {
 	res, err := http.Get("http://foo.com")
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 200)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo bar")
 }
 
@@ -46,7 +46,7 @@ func TestMockBodyMatch(t *testing.T) {
 	res, err := http.Post("http://foo.com", "text/plain", bytes.NewBuffer([]byte("foo bar")))
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo foo")
 }
 
@@ -72,7 +72,7 @@ func TestMockBodyMatchCompressed(t *testing.T) {
 	res, err := http.DefaultClient.Do(req)
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo foo")
 }
 
@@ -94,7 +94,7 @@ func TestMockBodyMatchJSON(t *testing.T) {
 	res, err := http.Post("http://foo.com/bar", "application/json", bytes.NewBuffer([]byte(`{"foo":"bar"}`)))
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"bar":"foo"}`)
 }
 
@@ -130,7 +130,7 @@ func TestMockBodyMatchCompressedJSON(t *testing.T) {
 	res, err := http.DefaultClient.Do(req)
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"bar":"foo"}`)
 }
 
@@ -164,7 +164,7 @@ func TestMockMatchHeaders(t *testing.T) {
 	res, err := http.Post("http://foo.com", "text/plain", bytes.NewBuffer([]byte("foo bar")))
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 200)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo foo")
 }
 
@@ -181,7 +181,7 @@ func TestMockMap(t *testing.T) {
 	res, err := http.Get("http://foo.com")
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 }
 
@@ -197,7 +197,7 @@ func TestMockFilter(t *testing.T) {
 	res, err := http.Get("http://foo.com")
 	st.Expect(t, err, nil)
 	st.Expect(t, res.StatusCode, 201)
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 }
 
@@ -273,7 +273,7 @@ func TestMockPersistent(t *testing.T) {
 		res, err := http.Get("http://foo.com/bar")
 		st.Expect(t, err, nil)
 		st.Expect(t, res.StatusCode, 200)
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 	}
 }
@@ -295,7 +295,7 @@ func TestMockPersistTimes(t *testing.T) {
 
 		st.Expect(t, err, nil)
 		st.Expect(t, res.StatusCode, 200)
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 	}
 }
@@ -348,7 +348,7 @@ func TestMultipleMocks(t *testing.T) {
 		res, err := http.Get("http://server.com" + test.path)
 		st.Expect(t, err, nil)
 		st.Expect(t, res.StatusCode, 200)
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		st.Expect(t, string(body)[:15], `{"value":"`+test.path[1:]+`"}`)
 	}
 
@@ -408,7 +408,7 @@ func TestMockRegExpMatching(t *testing.T) {
 	st.Expect(t, res.StatusCode, 200)
 	st.Expect(t, res.Header.Get("Server"), "gock")
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 }
 

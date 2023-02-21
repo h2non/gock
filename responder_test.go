@@ -3,7 +3,7 @@ package gock
 import (
 	"context"
 	"errors"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -21,7 +21,7 @@ func TestResponder(t *testing.T) {
 	st.Expect(t, res.Status, "200 OK")
 	st.Expect(t, res.StatusCode, 200)
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo")
 }
 
@@ -35,10 +35,10 @@ func TestResponder_ReadTwice(t *testing.T) {
 	st.Expect(t, res.Status, "200 OK")
 	st.Expect(t, res.StatusCode, 200)
 
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo")
 
-	body, err = ioutil.ReadAll(res.Body)
+	body, err = io.ReadAll(res.Body)
 	st.Expect(t, err, nil)
 	st.Expect(t, body, []byte{})
 }

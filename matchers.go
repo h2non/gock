@@ -4,7 +4,6 @@ import (
 	"compress/gzip"
 	"encoding/json"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"reflect"
 	"regexp"
@@ -171,7 +170,7 @@ func MatchBody(req *http.Request, ereq *Request) (bool, error) {
 	}
 
 	// Read the whole request body
-	body, err := ioutil.ReadAll(bodyReader)
+	body, err := io.ReadAll(bodyReader)
 	if err != nil {
 		return false, err
 	}

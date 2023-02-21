@@ -1,11 +1,12 @@
 package test
 
 import (
-	"github.com/nbio/st"
-	"github.com/h2non/gock"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/nbio/st"
 )
 
 func TestPersistent(t *testing.T) {
@@ -20,7 +21,7 @@ func TestPersistent(t *testing.T) {
 		res, err := http.Get("http://foo.com/bar")
 		st.Expect(t, err, nil)
 		st.Expect(t, res.StatusCode, 200)
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 	}
 
