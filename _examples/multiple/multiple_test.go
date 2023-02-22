@@ -1,11 +1,12 @@
 package test
 
 import (
-	"github.com/nbio/st"
-	"github.com/h2non/gock"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
+
+	"github.com/h2non/gock"
+	"github.com/nbio/st"
 )
 
 func TestMultipleMocks(t *testing.T) {
@@ -38,7 +39,7 @@ func TestMultipleMocks(t *testing.T) {
 		res, err := http.Get("http://server.com" + test.path)
 		st.Expect(t, err, nil)
 		st.Expect(t, res.StatusCode, 200)
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		st.Expect(t, string(body)[:15], `{"value":"`+test.path[1:]+`"}`)
 	}
 

@@ -5,7 +5,6 @@ package main
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 
@@ -24,7 +23,7 @@ func startHTTPServer() *httptest.Server {
 			return
 		}
 
-		body, _ := ioutil.ReadAll(res.Body)
+		body, _ := io.ReadAll(res.Body)
 		// MUST NOT get original body since the networking
 		// wasn't enabled for this request
 		fmt.Printf("Body From httpbin: %s\n", string(body))
@@ -61,6 +60,6 @@ func main() {
 	// The server header comes from mock as well
 	fmt.Printf("Server header: %s\n", res.Header.Get("Server"))
 	// MUST get original response since the networking was enabled for this request
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	fmt.Printf("Body From Local Server: %s", string(body))
 }

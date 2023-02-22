@@ -125,7 +125,7 @@ See [examples](https://github.com/h2non/gock/tree/master/_examples) directory fo
 package test
 
 import (
-  "io/ioutil"
+  "io"
   "net/http"
   "testing"
 
@@ -145,7 +145,7 @@ func TestSimple(t *testing.T) {
   st.Expect(t, err, nil)
   st.Expect(t, res.StatusCode, 200)
 
-  body, _ := ioutil.ReadAll(res.Body)
+  body, _ := io.ReadAll(res.Body)
   st.Expect(t, string(body)[:13], `{"foo":"bar"}`)
 
   // Verify that we don't have pending mocks
@@ -159,7 +159,7 @@ func TestSimple(t *testing.T) {
 package test
 
 import (
-  "io/ioutil"
+  "io"
   "net/http"
   "testing"
 
@@ -185,7 +185,7 @@ func TestMatchHeaders(t *testing.T) {
   res, err := (&http.Client{}).Do(req)
   st.Expect(t, err, nil)
   st.Expect(t, res.StatusCode, 200)
-  body, _ := ioutil.ReadAll(res.Body)
+  body, _ := io.ReadAll(res.Body)
   st.Expect(t, string(body), "foo foo")
 
   // Verify that we don't have pending mocks
@@ -199,7 +199,7 @@ func TestMatchHeaders(t *testing.T) {
 package test
 
 import (
-  "io/ioutil"
+  "io"
   "net/http"
   "testing"
 
@@ -221,7 +221,7 @@ func TestMatchParams(t *testing.T) {
   res, err := (&http.Client{}).Do(req)
   st.Expect(t, err, nil)
   st.Expect(t, res.StatusCode, 200)
-  body, _ := ioutil.ReadAll(res.Body)
+  body, _ := io.ReadAll(res.Body)
   st.Expect(t, string(body), "foo foo")
 
   // Verify that we don't have pending mocks
@@ -236,7 +236,7 @@ package test
 
 import (
   "bytes"
-  "io/ioutil"
+  "io"
   "net/http"
   "testing"
 	
@@ -259,7 +259,7 @@ func TestMockSimple(t *testing.T) {
   st.Expect(t, err, nil)
   st.Expect(t, res.StatusCode, 201)
 
-  resBody, _ := ioutil.ReadAll(res.Body)
+  resBody, _ := io.ReadAll(res.Body)
   st.Expect(t, string(resBody)[:13], `{"bar":"foo"}`)
 
   // Verify that we don't have pending mocks
@@ -273,7 +273,7 @@ func TestMockSimple(t *testing.T) {
 package test
 
 import (
-  "io/ioutil"
+  "io"
   "net/http"
   "testing"
 
@@ -295,7 +295,7 @@ func TestClient(t *testing.T) {
   res, err := client.Do(req)
   st.Expect(t, err, nil)
   st.Expect(t, res.StatusCode, 200)
-  body, _ := ioutil.ReadAll(res.Body)
+  body, _ := io.ReadAll(res.Body)
   st.Expect(t, string(body), "foo foo")
 
   // Verify that we don't have pending mocks
@@ -310,7 +310,7 @@ package main
 
 import (
   "fmt"
-  "io/ioutil"
+  "io"
   "net/http"
 
   "github.com/h2non/gock"
@@ -336,7 +336,7 @@ func main() {
   // The server header comes from mock as well
   fmt.Printf("Server header: %s\n", res.Header.Get("Server"))
   // Response body is the original
-  body, _ := ioutil.ReadAll(res.Body)
+  body, _ := io.ReadAll(res.Body)
   fmt.Printf("Body: %s", string(body))
 }
 ```
