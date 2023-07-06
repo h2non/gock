@@ -3,8 +3,10 @@ package gock
 import (
 	"context"
 	"errors"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -28,6 +30,65 @@ func TestResponder(t *testing.T) {
 func TestResponder_ReadTwice(t *testing.T) {
 	defer after()
 	mres := New("http://foo.com").Reply(200).BodyString("foo")
+	req := &http.Request{}
+
+	res, err := Responder(req, mres, nil)
+	st.Expect(t, err, nil)
+	st.Expect(t, res.Status, "200 OK")
+	st.Expect(t, res.StatusCode, 200)
+
+	body, _ := ioutil.ReadAll(res.Body)
+	st.Expect(t, string(body), "foo")
+
+	body, err = ioutil.ReadAll(res.Body)
+	st.Expect(t, err, nil)
+	st.Expect(t, body, []byte{})
+}
+
+func TestResponderBodyGenerator(t *testing.T) {
+	defer after()
+	generator := func() io.ReadCloser {
+		return io.NopCloser(strings.NewReader("foo"))
+	}
+	mres := New("http://foo.com").Reply(200).BodyGenerator(generator)
+	req := &http.Request{}
+
+	res, err := Responder(req, mres, nil)
+	st.Expect(t, err, nil)
+	st.Expect(t, res.Status, "200 OK")
+	st.Expect(t, res.StatusCode, 200)
+
+	body, _ := ioutil.ReadAll(res.Body)
+	st.Expect(t, string(body), "foo")
+}
+
+func TestResponderBodyGenerator_ReadTwice(t *testing.T) {
+	defer after()
+	generator := func() io.ReadCloser {
+		return io.NopCloser(strings.NewReader("foo"))
+	}
+	mres := New("http://foo.com").Reply(200).BodyGenerator(generator)
+	req := &http.Request{}
+
+	res, err := Responder(req, mres, nil)
+	st.Expect(t, err, nil)
+	st.Expect(t, res.Status, "200 OK")
+	st.Expect(t, res.StatusCode, 200)
+
+	body, _ := ioutil.ReadAll(res.Body)
+	st.Expect(t, string(body), "foo")
+
+	body, err = ioutil.ReadAll(res.Body)
+	st.Expect(t, err, nil)
+	st.Expect(t, body, []byte{})
+}
+
+func TestResponderBodyGenerator_Override(t *testing.T) {
+	defer after()
+	generator := func() io.ReadCloser {
+		return io.NopCloser(strings.NewReader("foo"))
+	}
+	mres := New("http://foo.com").Reply(200).BodyGenerator(generator).BodyString("bar")
 	req := &http.Request{}
 
 	res, err := Responder(req, mres, nil)

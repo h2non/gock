@@ -37,6 +37,9 @@ type Response struct {
 	// Cookies stores the response cookie fields.
 	Cookies []*http.Cookie
 
+	// BodyGen stores a io.ReadCloser generator to be returned.
+	BodyGen func() io.ReadCloser
+
 	// BodyBuffer stores the array of bytes to use as body.
 	BodyBuffer []byte
 
@@ -96,6 +99,13 @@ func (r *Response) SetHeaders(headers map[string]string) *Response {
 // Body sets the HTTP response body to be used.
 func (r *Response) Body(body io.Reader) *Response {
 	r.BodyBuffer, r.Error = ioutil.ReadAll(body)
+	return r
+}
+
+// BodyGenerator accepts a io.ReadCloser generator, returning custom io.ReadCloser
+// for every response. This will take priority than other Body methods used.
+func (r *Response) BodyGenerator(generator func() io.ReadCloser) *Response {
+	r.BodyGen = generator
 	return r
 }
 

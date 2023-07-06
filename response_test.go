@@ -3,6 +3,7 @@ package gock
 import (
 	"bytes"
 	"errors"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -74,6 +75,17 @@ func TestResponseBody(t *testing.T) {
 	res := NewResponse()
 	res.Body(bytes.NewBuffer([]byte("foo bar")))
 	st.Expect(t, string(res.BodyBuffer), "foo bar")
+}
+
+func TestResponseBodyGenerator(t *testing.T) {
+	res := NewResponse()
+	generator := func() io.ReadCloser {
+		return io.NopCloser(bytes.NewBuffer([]byte("foo bar")))
+	}
+	res.BodyGenerator(generator)
+	bytes, err := io.ReadAll(res.BodyGen())
+	st.Expect(t, err, nil)
+	st.Expect(t, string(bytes), "foo bar")
 }
 
 func TestResponseBodyString(t *testing.T) {

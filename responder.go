@@ -43,6 +43,12 @@ func Responder(req *http.Request, mock *Response, res *http.Response) (*http.Res
 		res.Body = createReadCloser(mock.BodyBuffer)
 	}
 
+	// Set raw mock body, if exist
+	if mock.BodyGen != nil {
+		res.ContentLength = -1
+		res.Body = mock.BodyGen()
+	}
+
 	// Apply response mappers
 	for _, mapper := range mock.Mappers {
 		if tres := mapper(res); tres != nil {
