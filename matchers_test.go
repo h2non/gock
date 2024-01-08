@@ -1,6 +1,9 @@
 package gock
 
 import (
+	"bytes"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
@@ -248,4 +251,10 @@ func TestMatchBody_MatchType(t *testing.T) {
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
+}
+
+// createReadCloser creates an io.ReadCloser from a byte slice that is suitable for use as an
+// http response body.
+func createReadCloser(body []byte) io.ReadCloser {
+	return ioutil.NopCloser(bytes.NewReader(body))
 }

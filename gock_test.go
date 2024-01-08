@@ -304,7 +304,7 @@ func TestUnmatched(t *testing.T) {
 	defer after()
 
 	// clear out any unmatchedRequests from other tests
-	unmatchedRequests = []*http.Request{}
+	CleanUnmatchedRequest()
 
 	Intercept()
 

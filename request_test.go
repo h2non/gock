@@ -266,7 +266,6 @@ func TestRequestAddMatcher(t *testing.T) {
 
 	ereq := NewRequest()
 	mock := NewMock(ereq, &Response{})
-	mock.matcher = NewMatcher()
 	ereq.Mock = mock
 
 	ereq.AddMatcher(func(req *http.Request, ereq *Request) (bool, error) {
