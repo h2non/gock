@@ -1,10 +1,11 @@
-package gock
+package threadsafe
 
 import (
 	"bytes"
 	"errors"
 	"io"
 	"net/http"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -12,7 +13,8 @@ import (
 )
 
 func TestNewResponse(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 
 	res.Status(200)
 	st.Expect(t, res.StatusCode, 200)
@@ -28,28 +30,31 @@ func TestNewResponse(t *testing.T) {
 }
 
 func TestResponseStatus(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	st.Expect(t, res.StatusCode, 0)
 	res.Status(200)
 	st.Expect(t, res.StatusCode, 200)
 }
 
 func TestResponseType(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.Type("json")
 	st.Expect(t, res.Header.Get("Content-Type"), "application/json")
 
-	res = NewResponse()
+	res = g.NewResponse()
 	res.Type("xml")
 	st.Expect(t, res.Header.Get("Content-Type"), "application/xml")
 
-	res = NewResponse()
+	res = g.NewResponse()
 	res.Type("foo/bar")
 	st.Expect(t, res.Header.Get("Content-Type"), "foo/bar")
 }
 
 func TestResponseSetHeader(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.SetHeader("foo", "bar")
 	res.SetHeader("bar", "baz")
 	st.Expect(t, res.Header.Get("foo"), "bar")
@@ -57,7 +62,8 @@ func TestResponseSetHeader(t *testing.T) {
 }
 
 func TestResponseAddHeader(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.AddHeader("foo", "bar")
 	res.AddHeader("foo", "baz")
 	st.Expect(t, res.Header.Get("foo"), "bar")
@@ -65,20 +71,23 @@ func TestResponseAddHeader(t *testing.T) {
 }
 
 func TestResponseSetHeaders(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.SetHeaders(map[string]string{"foo": "bar", "bar": "baz"})
 	st.Expect(t, res.Header.Get("foo"), "bar")
 	st.Expect(t, res.Header.Get("bar"), "baz")
 }
 
 func TestResponseBody(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.Body(bytes.NewBuffer([]byte("foo bar")))
 	st.Expect(t, string(res.BodyBuffer), "foo bar")
 }
 
 func TestResponseBodyGenerator(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	generator := func() io.ReadCloser {
 		return io.NopCloser(bytes.NewBuffer([]byte("foo bar")))
 	}
@@ -89,26 +98,32 @@ func TestResponseBodyGenerator(t *testing.T) {
 }
 
 func TestResponseBodyString(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.BodyString("foo bar")
 	st.Expect(t, string(res.BodyBuffer), "foo bar")
 }
 
 func TestResponseFile(t *testing.T) {
-	res := NewResponse()
-	res.File("version.go")
+	g := NewGock()
+	res := g.NewResponse()
+	absPath, err := filepath.Abs("../version.go")
+	st.Expect(t, err, nil)
+	res.File(absPath)
 	st.Expect(t, string(res.BodyBuffer)[:12], "package gock")
 }
 
 func TestResponseJSON(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	res.JSON(map[string]string{"foo": "bar"})
 	st.Expect(t, string(res.BodyBuffer)[:13], `{"foo":"bar"}`)
 	st.Expect(t, res.Header.Get("Content-Type"), "application/json")
 }
 
 func TestResponseXML(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	type xml struct {
 		Data string `xml:"data"`
 	}
@@ -118,7 +133,8 @@ func TestResponseXML(t *testing.T) {
 }
 
 func TestResponseMap(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	st.Expect(t, len(res.Mappers), 0)
 	res.Map(func(res *http.Response) *http.Response {
 		return res
@@ -127,7 +143,8 @@ func TestResponseMap(t *testing.T) {
 }
 
 func TestResponseFilter(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	st.Expect(t, len(res.Filters), 0)
 	res.Filter(func(res *http.Response) bool {
 		return true
@@ -136,29 +153,33 @@ func TestResponseFilter(t *testing.T) {
 }
 
 func TestResponseSetError(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	st.Expect(t, res.Error, nil)
 	res.SetError(errors.New("foo error"))
 	st.Expect(t, res.Error.Error(), "foo error")
 }
 
 func TestResponseDelay(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	st.Expect(t, res.ResponseDelay, 0*time.Microsecond)
 	res.Delay(100 * time.Millisecond)
 	st.Expect(t, res.ResponseDelay, 100*time.Millisecond)
 }
 
 func TestResponseEnableNetworking(t *testing.T) {
-	res := NewResponse()
+	g := NewGock()
+	res := g.NewResponse()
 	st.Expect(t, res.UseNetwork, false)
 	res.EnableNetworking()
 	st.Expect(t, res.UseNetwork, true)
 }
 
 func TestResponseDone(t *testing.T) {
-	res := NewResponse()
-	res.Mock = NewMock(&Request{Counter: 1}, res)
+	g := NewGock()
+	res := g.NewResponse()
+	res.Mock = &Mocker{request: &Request{Counter: 1}, disabler: new(disabler)}
 	st.Expect(t, res.Done(), false)
 	res.Mock.Disable()
 	st.Expect(t, res.Done(), true)

@@ -1,4 +1,4 @@
-package gock
+package threadsafe
 
 import (
 	"net/http"
@@ -9,71 +9,80 @@ import (
 )
 
 func TestRegisteredMatchers(t *testing.T) {
-	st.Expect(t, len(MatchersHeader()), 7)
-	st.Expect(t, len(MatchersBody()), 1)
+	g := NewGock()
+	st.Expect(t, len(g.MatchersHeader), 7)
+	st.Expect(t, len(g.MatchersBody), 1)
 }
 
 func TestNewMatcher(t *testing.T) {
-	matcher := NewMatcher()
+	g := NewGock()
+	matcher := g.NewMatcher()
 	// Funcs are not comparable, checking slice length as it's better than nothing
 	// See https://golang.org/pkg/reflect/#DeepEqual
-	st.Expect(t, len(matcher.Matchers), len(Matchers()))
-	st.Expect(t, len(matcher.Get()), len(Matchers()))
+	st.Expect(t, len(matcher.Matchers), len(g.Matchers))
+	st.Expect(t, len(matcher.Get()), len(g.Matchers))
 }
 
 func TestNewBasicMatcher(t *testing.T) {
-	matcher := NewBasicMatcher()
+	g := NewGock()
+	matcher := g.NewBasicMatcher()
 	// Funcs are not comparable, checking slice length as it's better than nothing
 	// See https://golang.org/pkg/reflect/#DeepEqual
-	st.Expect(t, len(matcher.Matchers), len(MatchersHeader()))
-	st.Expect(t, len(matcher.Get()), len(MatchersHeader()))
+	st.Expect(t, len(matcher.Matchers), len(g.MatchersHeader))
+	st.Expect(t, len(matcher.Get()), len(g.MatchersHeader))
 }
 
 func TestNewEmptyMatcher(t *testing.T) {
-	matcher := NewEmptyMatcher()
+	g := NewGock()
+	matcher := g.NewEmptyMatcher()
 	st.Expect(t, len(matcher.Matchers), 0)
 	st.Expect(t, len(matcher.Get()), 0)
 }
 
 func TestMatcherAdd(t *testing.T) {
-	matcher := NewMatcher()
-	st.Expect(t, len(matcher.Matchers), len(Matchers()))
+	g := NewGock()
+	matcher := g.NewMatcher()
+	st.Expect(t, len(matcher.Matchers), len(g.Matchers))
 	matcher.Add(func(req *http.Request, ereq *Request) (bool, error) {
 		return true, nil
 	})
-	st.Expect(t, len(matcher.Get()), len(Matchers())+1)
+	st.Expect(t, len(matcher.Get()), len(g.Matchers)+1)
 }
 
 func TestMatcherSet(t *testing.T) {
-	matcher := NewMatcher()
+	g := NewGock()
+	matcher := g.NewMatcher()
 	matchers := []MatchFunc{}
-	st.Expect(t, len(matcher.Matchers), len(Matchers()))
+	st.Expect(t, len(matcher.Matchers), len(g.Matchers))
 	matcher.Set(matchers)
 	st.Expect(t, matcher.Matchers, matchers)
 	st.Expect(t, len(matcher.Get()), 0)
 }
 
 func TestMatcherGet(t *testing.T) {
-	matcher := NewMatcher()
+	g := NewGock()
+	matcher := g.NewMatcher()
 	matchers := []MatchFunc{}
 	matcher.Set(matchers)
 	st.Expect(t, matcher.Get(), matchers)
 }
 
 func TestMatcherFlush(t *testing.T) {
-	matcher := NewMatcher()
-	st.Expect(t, len(matcher.Matchers), len(Matchers()))
+	g := NewGock()
+	matcher := g.NewMatcher()
+	st.Expect(t, len(matcher.Matchers), len(g.Matchers))
 	matcher.Add(func(req *http.Request, ereq *Request) (bool, error) {
 		return true, nil
 	})
-	st.Expect(t, len(matcher.Get()), len(Matchers())+1)
+	st.Expect(t, len(matcher.Get()), len(g.Matchers)+1)
 	matcher.Flush()
 	st.Expect(t, len(matcher.Get()), 0)
 }
 
 func TestMatcherClone(t *testing.T) {
-	matcher := DefaultMatcher().Clone()
-	st.Expect(t, len(matcher.Get()), len(DefaultMatcher().Get()))
+	g := NewGock()
+	matcher := g.DefaultMatcher.Clone()
+	st.Expect(t, len(matcher.Get()), len(g.DefaultMatcher.Get()))
 }
 
 func TestMatcher(t *testing.T) {
@@ -90,7 +99,8 @@ func TestMatcher(t *testing.T) {
 		{"GET", "http://foo.com", false},
 	}
 
-	matcher := NewMatcher()
+	g := NewGock()
+	matcher := g.NewMatcher()
 	matcher.Flush()
 	st.Expect(t, len(matcher.Matchers), 0)
 
@@ -115,20 +125,20 @@ func TestMatcher(t *testing.T) {
 
 func TestMatchMock(t *testing.T) {
 	cases := []struct {
-		method   string
-		methodFn func(r *Request, path string) *Request
-		url      string
-		matches  bool
+		method  string
+		url     string
+		matches bool
 	}{
-		{"GET", (*Request).Get, "http://foo.com/bar", true},
-		{"GET", (*Request).Get, "http://foo.com/baz", true},
-		{"GET", (*Request).Get, "http://foo.com/foo", false},
-		{"POST", (*Request).Post, "http://foo.com/bar", false},
-		{"POST", (*Request).Post, "http://bar.com/bar", false},
-		{"GET", (*Request).Get, "http://foo.com", false},
+		{"GET", "http://foo.com/bar", true},
+		{"GET", "http://foo.com/baz", true},
+		{"GET", "http://foo.com/foo", false},
+		{"POST", "http://foo.com/bar", false},
+		{"POST", "http://bar.com/bar", false},
+		{"GET", "http://foo.com", false},
 	}
 
-	matcher := DefaultMatcher()
+	g := NewGock()
+	matcher := g.DefaultMatcher
 	matcher.Flush()
 	st.Expect(t, len(matcher.Matchers), 0)
 
@@ -143,13 +153,13 @@ func TestMatchMock(t *testing.T) {
 	})
 
 	for _, test := range cases {
-		Flush()
-		mock := test.methodFn(New(test.url), "").Mock
+		g.Flush()
+		mock := g.New(test.url).method(test.method, "").Mock
 
 		u, _ := url.Parse(test.url)
 		req := &http.Request{Method: test.method, URL: u}
 
-		match, err := MatchMock(req)
+		match, err := g.MatchMock(req)
 		st.Expect(t, err, nil)
 		if test.matches {
 			st.Expect(t, match, mock)
@@ -158,5 +168,5 @@ func TestMatchMock(t *testing.T) {
 		}
 	}
 
-	DefaultMatcher().Matchers = Matchers()
+	g.DefaultMatcher.Matchers = g.Matchers
 }

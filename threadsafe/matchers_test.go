@@ -1,9 +1,6 @@
-package gock
+package threadsafe
 
 import (
-	"bytes"
-	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"testing"
@@ -27,7 +24,7 @@ func TestMatchMethod(t *testing.T) {
 	for _, test := range cases {
 		req := &http.Request{Method: test.method}
 		ereq := &Request{Method: test.value}
-		matches, err := MatchMethod(req, ereq)
+		matches, err := NewGock().MatchMethod(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
@@ -49,7 +46,7 @@ func TestMatchScheme(t *testing.T) {
 	for _, test := range cases {
 		req := &http.Request{URL: &url.URL{Scheme: test.scheme}}
 		ereq := &Request{URLStruct: &url.URL{Scheme: test.value}}
-		matches, err := MatchScheme(req, ereq)
+		matches, err := NewGock().MatchScheme(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
@@ -77,11 +74,11 @@ func TestMatchHost(t *testing.T) {
 	for _, test := range cases {
 		req := &http.Request{URL: &url.URL{Host: test.url}}
 		ereq := &Request{URLStruct: &url.URL{Host: test.value}}
-		matches, err := MatchHost(req, ereq)
+		matches, err := NewGock().MatchHost(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 		ereq.WithOptions(Options{DisableRegexpHost: true})
-		matches, err = MatchHost(req, ereq)
+		matches, err = NewGock().MatchHost(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matchesNonRegexp)
 	}
@@ -110,7 +107,7 @@ func TestMatchPath(t *testing.T) {
 		mu, _ := url.Parse("http://foo.com" + test.value)
 		req := &http.Request{URL: u}
 		ereq := &Request{URLStruct: mu}
-		matches, err := MatchPath(req, ereq)
+		matches, err := NewGock().MatchPath(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
@@ -139,7 +136,7 @@ func TestMatchHeaders(t *testing.T) {
 	for _, test := range cases {
 		req := &http.Request{Header: test.headers}
 		ereq := &Request{Header: test.values}
-		matches, err := MatchHeaders(req, ereq)
+		matches, err := NewGock().MatchHeaders(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
@@ -167,7 +164,7 @@ func TestMatchQueryParams(t *testing.T) {
 		mu, _ := url.Parse("http://foo.com/?" + test.value)
 		req := &http.Request{URL: u}
 		ereq := &Request{URLStruct: mu}
-		matches, err := MatchQueryParams(req, ereq)
+		matches, err := NewGock().MatchQueryParams(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
@@ -194,7 +191,7 @@ func TestMatchPathParams(t *testing.T) {
 			URLStruct:  mu,
 			PathParams: map[string]string{test.key: test.value},
 		}
-		matches, err := MatchPathParams(req, ereq)
+		matches, err := NewGock().MatchPathParams(req, ereq)
 		st.Expect(t, err, nil, i)
 		st.Expect(t, matches, test.matches, i)
 	}
@@ -217,10 +214,11 @@ func TestMatchBody(t *testing.T) {
 		{`{"bar":"foo","foo":{"two":"three","three":"two"}}`, `{"foo":{"three":"two","two":"three"},"bar":"foo"}`, true},
 	}
 
+	g := NewGock()
 	for _, test := range cases {
 		req := &http.Request{Body: createReadCloser([]byte(test.body))}
 		ereq := &Request{BodyBuffer: []byte(test.value)}
-		matches, err := MatchBody(req, ereq)
+		matches, err := g.MatchBody(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
@@ -241,20 +239,15 @@ func TestMatchBody_MatchType(t *testing.T) {
 		{"", "", "", true},
 	}
 
+	g := NewGock()
 	for _, test := range cases {
 		req := &http.Request{
 			Header: http.Header{"Content-Type": []string{test.requestContentType}},
 			Body:   createReadCloser([]byte(test.body)),
 		}
-		ereq := NewRequest().BodyString(test.body).MatchType(test.customBodyType)
-		matches, err := MatchBody(req, ereq)
+		ereq := g.NewRequest().BodyString(test.body).MatchType(test.customBodyType)
+		matches, err := g.MatchBody(req, ereq)
 		st.Expect(t, err, nil)
 		st.Expect(t, matches, test.matches)
 	}
-}
-
-// createReadCloser creates an io.ReadCloser from a byte slice that is suitable for use as an
-// http response body.
-func createReadCloser(body []byte) io.ReadCloser {
-	return ioutil.NopCloser(bytes.NewReader(body))
 }
