@@ -49,11 +49,11 @@ func Exists(m Mock) bool {
 
 // Remove removes a registered mock by reference.
 func Remove(m Mock) {
+	storeMutex.Lock()
+	defer storeMutex.Unlock()
 	for i, mock := range mocks {
 		if mock == m {
-			storeMutex.Lock()
 			mocks = append(mocks[:i], mocks[i+1:]...)
-			storeMutex.Unlock()
 		}
 	}
 }
