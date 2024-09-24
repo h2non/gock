@@ -97,7 +97,7 @@ func Disable() {
 }
 
 // Off disables the default HTTP interceptors and removes
-// all the registered mocks, even if they has not been intercepted yet.
+// all the registered mocks, even if they have not been intercepted yet.
 func Off() {
 	Flush()
 	Disable()
