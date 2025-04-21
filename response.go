@@ -2,18 +2,20 @@ package gock
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"encoding/xml"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
 
-// MapResponseFunc represents the required function interface impletemed by response mappers.
+// MapResponseFunc represents the required function interface implemented by response mappers.
 type MapResponseFunc func(*http.Response) *http.Response
 
-// FilterResponseFunc represents the required function interface impletemed by response filters.
+// FilterResponseFunc represents the required function interface implemented by response filters.
 type FilterResponseFunc func(*http.Response) bool
 
 // Response represents high-level HTTP fields to configure
@@ -82,7 +84,7 @@ func (r *Response) SetHeader(key, value string) *Response {
 }
 
 // AddHeader adds a new header field in the mock response
-// with out removing an existent one.
+// without removing an existent one.
 func (r *Response) AddHeader(key, value string) *Response {
 	r.Header.Add(key, value)
 	return r
@@ -143,7 +145,6 @@ func (r *Response) SetError(err error) *Response {
 }
 
 // Delay defines the response simulated delay.
-// This feature is still experimental and will be improved in the future.
 func (r *Response) Delay(delay time.Duration) *Response {
 	r.ResponseDelay = delay
 	return r
@@ -161,7 +162,7 @@ func (r *Response) Filter(fn FilterResponseFunc) *Response {
 	return r
 }
 
-// EnableNetworking enables the use real networking for the current mock.
+// EnableNetworking enables the use of real networking for the current mock.
 func (r *Response) EnableNetworking() *Response {
 	r.UseNetwork = true
 	return r
@@ -170,6 +171,67 @@ func (r *Response) EnableNetworking() *Response {
 // Done returns true if the mock was done and disabled.
 func (r *Response) Done() bool {
 	return r.Mock.Done()
+}
+
+// Respond generates the HTTP response for the mock, respecting context deadlines
+func (r *Response) Respond(req *http.Request) (*http.Response, error) {
+	if r.Error != nil {
+		return nil, r.Error
+	}
+
+	// Handle response delay while respecting context deadline
+	if r.ResponseDelay > 0 {
+		if deadline, ok := req.Context().Deadline(); ok {
+			timeUntilDeadline := time.Until(deadline)
+			if r.ResponseDelay > timeUntilDeadline {
+				// Simulate timeout if delay exceeds client timeout
+				return nil, context.DeadlineExceeded
+			}
+		}
+
+		// Apply delay, respecting context cancellation
+		select {
+		case <-req.Context().Done():
+			return nil, req.Context().Err()
+		case <-time.After(r.ResponseDelay):
+			// Proceed with response
+		}
+	}
+
+	resp := &http.Response{
+		StatusCode: r.StatusCode,
+		Header:     r.Header,
+		Body:       ioutil.NopCloser(bytes.NewReader(r.BodyBuffer)),
+		Request:    req,
+	}
+	if r.BodyGen != nil {
+		resp.Body = r.BodyGen()
+	}
+	if resp.Header == nil {
+		resp.Header = make(http.Header)
+	}
+	if resp.StatusCode == 0 {
+		resp.StatusCode = http.StatusOK
+	}
+
+	// Apply cookies
+	for _, cookie := range r.Cookies {
+		resp.Header.Add("Set-Cookie", cookie.String())
+	}
+
+	// Apply mappers
+	for _, mapper := range r.Mappers {
+		resp = mapper(resp)
+	}
+
+	// Apply filters
+	for _, filter := range r.Filters {
+		if !filter(resp) {
+			return nil, fmt.Errorf("response filtered out")
+		}
+	}
+
+	return resp, nil
 }
 
 func readAndDecode(data interface{}, kind string) ([]byte, error) {
