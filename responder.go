@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -46,7 +47,7 @@ func Responder(req *http.Request, mock *Response, res *http.Response) (*http.Res
 	// Set raw mock body, if exist
 	if mock.BodyGen != nil {
 		res.ContentLength = -1
-		res.Body = mock.BodyGen()
+		res.Body = wrapBody(mock.BodyGen())
 	}
 
 	// Apply response mappers
@@ -104,8 +105,48 @@ func mergeHeaders(res *http.Response, mres *Response) http.Header {
 	return res.Header
 }
 
+// bodyCloser tracks Close so later Read fails, matching net/http response bodies.
+// ioutil.NopCloser hid that, so tests could not catch read-after-close bugs.
+type bodyCloser struct {
+	io.Reader
+	mu     sync.Mutex
+	closed bool
+}
+
+func (b *bodyCloser) Read(p []byte) (int, error) {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.closed {
+		return 0, http.ErrBodyReadAfterClose
+	}
+	return b.Reader.Read(p)
+}
+
+func (b *bodyCloser) Close() error {
+	b.mu.Lock()
+	defer b.mu.Unlock()
+	if b.closed {
+		return nil
+	}
+	b.closed = true
+	if c, ok := b.Reader.(io.Closer); ok {
+		return c.Close()
+	}
+	return nil
+}
+
+func wrapBody(r io.Reader) io.ReadCloser {
+	if r == nil {
+		r = bytes.NewReader(nil)
+	}
+	if bc, ok := r.(*bodyCloser); ok {
+		return bc
+	}
+	return &bodyCloser{Reader: r}
+}
+
 // createReadCloser creates an io.ReadCloser from a byte slice that is suitable for use as an
 // http response body.
 func createReadCloser(body []byte) io.ReadCloser {
-	return ioutil.NopCloser(bytes.NewReader(body))
+	return wrapBody(bytes.NewReader(body))
 }

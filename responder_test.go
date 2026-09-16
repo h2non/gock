@@ -27,6 +27,20 @@ func TestResponder(t *testing.T) {
 	st.Expect(t, string(body), "foo")
 }
 
+func TestResponder_ReadAfterClose(t *testing.T) {
+	defer after()
+	mres := New("http://foo.com").Reply(200).JSON(map[string]string{"foo": "bar"})
+	req := &http.Request{}
+
+	res, err := Responder(req, mres, nil)
+	st.Expect(t, err, nil)
+	st.Expect(t, res.Body.Close(), nil)
+
+	n, err := res.Body.Read(make([]byte, 8))
+	st.Expect(t, n, 0)
+	st.Expect(t, err, http.ErrBodyReadAfterClose)
+}
+
 func TestResponder_ReadTwice(t *testing.T) {
 	defer after()
 	mres := New("http://foo.com").Reply(200).BodyString("foo")
@@ -60,6 +74,23 @@ func TestResponderBodyGenerator(t *testing.T) {
 
 	body, _ := ioutil.ReadAll(res.Body)
 	st.Expect(t, string(body), "foo")
+}
+
+func TestResponderBodyGenerator_ReadAfterClose(t *testing.T) {
+	defer after()
+	generator := func() io.ReadCloser {
+		return ioutil.NopCloser(strings.NewReader("foo"))
+	}
+	mres := New("http://foo.com").Reply(200).BodyGenerator(generator)
+	req := &http.Request{}
+
+	res, err := Responder(req, mres, nil)
+	st.Expect(t, err, nil)
+	st.Expect(t, res.Body.Close(), nil)
+
+	n, err := res.Body.Read(make([]byte, 8))
+	st.Expect(t, n, 0)
+	st.Expect(t, err, http.ErrBodyReadAfterClose)
 }
 
 func TestResponderBodyGenerator_ReadTwice(t *testing.T) {
