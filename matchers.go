@@ -107,7 +107,9 @@ func MatchQueryParams(req *http.Request, ereq *Request) (bool, error) {
 		var match bool
 
 		for _, field := range req.URL.Query()[key] {
-			match, err = regexp.MatchString(value[0], field)
+			// Match the whole query value. Unanchored MatchString made
+			// MatchParam("limit", "0") succeed against "10" (issue #123).
+			match, err = regexp.MatchString("^(?:"+value[0]+")$", field)
 			if err != nil {
 				return false, err
 			}

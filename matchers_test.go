@@ -150,11 +150,14 @@ func TestMatchQueryParams(t *testing.T) {
 	}{
 		{"foo=bar", "foo=bar", true},
 		{"foo=bar", "foo=foo&foo=bar", true},
-		{"foo=b*", "foo=bar", true},
+		{"foo=b.*", "foo=bar", true},
 		{"foo=.*", "foo=bar", true},
 		{"foo=f[o]{2}", "foo=foo", true},
 		{"foo=bar&bar=foo", "foo=bar&foo=foo&bar=foo", true},
-		{"foo=", "foo=bar", true},
+		{"foo=", "foo=", true},
+		{"foo=", "foo=bar", false},
+		{"foo=0", "foo=0", true},
+		{"foo=0", "foo=10", false},
 		{"foo=foo", "foo=bar", false},
 		{"bar=bar", "foo=bar bar", false},
 	}
