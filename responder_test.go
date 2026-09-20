@@ -167,10 +167,9 @@ func TestResponderPreExpiredContext(t *testing.T) {
 	defer after()
 	mres := New("http://foo.com").Get("").Reply(200).BodyString("foo")
 
-	// create a context and wait to ensure it is expired
-	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Microsecond)
+	// create a context whose deadline has already expired
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-time.Second))
 	defer cancel()
-	time.Sleep(1 * time.Millisecond)
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://foo.com", nil)
 
 	res, err := Responder(req, mres, nil)
