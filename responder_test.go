@@ -170,7 +170,7 @@ func TestResponderPreExpiredContext(t *testing.T) {
 	// create a context and wait to ensure it is expired
 	ctx, cancel := context.WithTimeout(context.Background(), 500*time.Microsecond)
 	defer cancel()
-	time.Sleep(1 * time.Millisecond)
+	<-ctx.Done()
 	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://foo.com", nil)
 
 	res, err := Responder(req, mres, nil)
@@ -179,3 +179,20 @@ func TestResponderPreExpiredContext(t *testing.T) {
 	st.Expect(t, err, context.DeadlineExceeded)
 	st.Expect(t, res == nil, true)
 }
+
+func TestResponderAlreadyExpiredContext(t *testing.T) {
+	defer after()
+	mres := New("http://foo.com").Get("").Reply(200).BodyString("foo")
+
+	// create a context whose deadline has already passed
+	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-1*time.Second))
+	defer cancel()
+	req, _ := http.NewRequestWithContext(ctx, http.MethodGet, "http://foo.com", nil)
+
+	res, err := Responder(req, mres, nil)
+
+	// verify that we got a context cancellation error and nil response
+	st.Expect(t, err, context.DeadlineExceeded)
+	st.Expect(t, res == nil, true)
+}
+
