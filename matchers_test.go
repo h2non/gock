@@ -249,3 +249,13 @@ func TestMatchBody_MatchType(t *testing.T) {
 		st.Expect(t, matches, test.matches)
 	}
 }
+
+func TestMatchBody_NilBody(t *testing.T) {
+	req := &http.Request{
+		Body: nil,
+	}
+	ereq := NewRequest().BodyString("foo bar")
+	matches, err := MatchBody(req, ereq)
+	st.Expect(t, err, nil)
+	st.Expect(t, matches, false)
+}

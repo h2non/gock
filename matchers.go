@@ -157,6 +157,10 @@ func MatchBody(req *http.Request, ereq *Request) (bool, error) {
 		return false, nil
 	}
 
+	if req.Body == nil {
+		return false, nil
+	}
+
 	// Create a reader for the body depending on compression type
 	bodyReader := req.Body
 	if ereq.CompressionScheme != "" {
